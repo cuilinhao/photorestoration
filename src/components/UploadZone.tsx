@@ -7,7 +7,7 @@ import { toast } from "sonner"
 import Loader from "./Loader"
 import ResultSlider from "./ResultSlider"
 import { uploadToStorage } from "@/lib/supabase"
-import { createPrediction, getPrediction } from "@/lib/replicate"
+import { createPrediction, pollPrediction } from "@/lib/replicate"
 
 type UploadState = 'idle' | 'uploading' | 'predicting' | 'success' | 'fail'
 
@@ -37,16 +37,14 @@ export default function UploadZone() {
       setPredictionId(prediction.id)
 
       // Poll for result
-      const result = await getPrediction(prediction.id) as PredictionResult
+      const result = await pollPrediction(prediction.id)
 
-      if (result.status === 'succeeded') {
-        // For demo, we'll create a colorized version using a filter effect
-        // In real implementation, this would be the actual AI result
-        setColorizedImage(result.output || '/demo/old_photo_color.jpg')
+      if (result.status === 'succeeded' && result.output) {
+        setColorizedImage(result.output)
         setState('success')
         toast.success('AI 上色完成！')
       } else {
-        throw new Error('Prediction failed')
+        throw new Error(`Prediction failed: ${result.error || 'Unknown error'}`)
       }
 
     } catch (error) {

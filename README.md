@@ -1,111 +1,111 @@
-# ColorOld - AI 老照片上色工具
+# ColorOld - AI 黑白照片着色工具
 
-一个基于 Next.js 和 AI 技术的老照片上色 Web 应用，60 秒内让您的黑白老照片重新焕发色彩！
+一个基于 Next.js 15 和 AI 技术的老照片着色 Web 应用，让您的黑白历史照片瞬间重焕色彩！
 
-## ✨ 功能特性
-//ssss
-- **智能上色**：使用先进的 AI 算法为黑白/褪色照片添加自然色彩
-- **快速处理**：承诺 60 秒内完成上色处理
-- **高清输出**：支持 2K 分辨率输出，保持照片清晰度
-- **拖拽上传**：支持拖拽和点击上传，操作简便
-- **实时对比**：可拖拽的前后对比滑块，直观展示上色效果
-- **一键下载**：处理完成后可直接下载高清彩色照片
+## ✨ 核心功能
 
-## 🛠 技术栈
+- **🎨 智能着色**：基于 AI 算法自动为黑白照片添加自然色彩
+- **⚡ 快速处理**：60 秒内完成着色处理
+- **🖼️ 高清输出**：支持高分辨率图片输出，保持原图质量
+- **📱 响应式设计**：完美适配桌面和移动设备
+- **🔧 拖拽上传**：支持拖拽和点击上传，操作简便
+- **👁️ 实时对比**：滑动对比查看着色前后效果
+- **💾 一键下载**：处理完成后可直接下载高清彩色照片
 
-### 前端框架
-- **Next.js 15** - React 全栈框架
-- **TypeScript** - 类型安全的 JavaScript
+## 🛠️ 技术栈
+
+### 前端技术
+- **Next.js 15** - React 全栈框架（App Router）
+- **TypeScript** - 类型安全开发
 - **Tailwind CSS** - 原子化 CSS 框架
-- **Shadcn UI** - 现代化 UI 组件库
+- **Shadcn/ui** - 现代化 UI 组件库
 
 ### 核心依赖
-- **react-compare-image** - 图片对比滑块组件
+- **react-compare-image** - 图片对比滑块
 - **react-dropzone** - 文件拖拽上传
-- **lucide-react** - 现代图标库
 - **sonner** - 优雅的消息提示
+- **lucide-react** - 现代图标库
 
-### 后端服务
+### AI 服务（计划中）
 - **Replicate API** - AI 图像处理服务
 - **Supabase Storage** - 云端图片存储
 
-## 📦 安装与运行
+## 🚀 快速开始
 
 ### 环境要求
-- Node.js 18+ 或 Bun
-- 现代浏览器支持
+- Node.js 18+
+- npm/yarn/pnpm/bun
 
-### 快速开始
+### 安装步骤
 
-1. **克隆项目**
 ```bash
-git clone <repository-url>
+# 克隆项目
+git clone <your-repo-url>
 cd colorold
-```
 
-2. **安装依赖**
-```bash
-bun install
-# 或使用 npm
+# 安装依赖
 npm install
-```
 
-3. **启动开发服务器**
-```bash
-bun dev
-# 或使用 npm
+# 启动开发服务器
 npm run dev
 ```
 
-4. **打开浏览器**
-访问 [http://localhost:3000](http://localhost:3000) 查看应用
+### 访问应用
+打开浏览器访问 [http://localhost:3000](http://localhost:3000)
 
-### 可用脚本
-
-```bash
-bun dev          # 启动开发服务器
-bun build        # 构建生产版本
-bun start        # 启动生产服务器
-bun lint         # 代码检查和格式化
-bun format       # 代码格式化
-```
-
-## 🎯 使用方法
-
-1. **上传照片**：拖拽或点击上传您的黑白/褪色老照片
-2. **等待处理**：AI 将在 60 秒内完成上色处理
-3. **查看效果**：使用滑块对比上色前后的效果
-4. **下载保存**：满意后点击下载高清彩色照片
-
-### 支持格式
-- **文件类型**：JPG, JPEG, PNG
-- **文件大小**：最大 8MB
-- **输出格式**：高清 JPG
-
-## 🏗 项目结构
+## 📁 项目结构
 
 ```
 colorold/
 ├── src/
-│   ├── app/                 # Next.js App Router
-│   │   ├── page.tsx         # 首页
-│   │   └── layout.tsx       # 根布局
-│   ├── components/          # React 组件
-│   │   ├── HeroSlider.tsx   # 首页展示组件
-│   │   ├── UploadZone.tsx   # 文件上传组件
-│   │   ├── ResultSlider.tsx # 结果对比组件
-│   │   └── ui/              # UI 基础组件
-│   └── lib/                 # 工具函数
-│       ├── replicate.ts     # AI 服务接口
-│       └── supabase.ts      # 存储服务接口
+│   ├── app/                    # Next.js App Router
+│   │   ├── page.tsx           # 首页
+│   │   ├── layout.tsx         # 根布局
+│   │   └── ClientBody.tsx      # 客户端包装组件
+│   ├── components/             # React 组件
+│   │   ├── HeroSlider.tsx     # 首页展示滑块
+│   │   ├── UploadZone.tsx     # 文件上传区域
+│   │   ├── ResultSlider.tsx   # 结果对比滑块
+│   │   ├── Loader.tsx         # 加载动画组件
+│   │   └── ui/                # 基础 UI 组件
+│   └── lib/                   # 工具函数
+│       ├── replicate.ts       # AI 服务接口（Mock）
+│       ├── supabase.ts        # 存储服务接口（Mock）
+│       └── utils.ts           # 通用工具函数
 ├── public/
-│   └── demo/                # 演示图片
+│   └── demo/                  # 演示图片
+│       ├── old_photo_bw.jpg   # 黑白演示图
+│       └── old_photo_color.jpg # 彩色演示图
 └── 配置文件...
+```
+
+## 🎯 使用方法
+
+1. **访问应用**：在浏览器中打开应用
+2. **查看演示**：首页滑块展示着色效果
+3. **上传照片**：点击"立即尝试"，拖拽或选择黑白照片
+4. **等待处理**：AI 将在约 60 秒内完成着色
+5. **查看结果**：使用滑块对比着色前后效果
+6. **下载保存**：点击下载按钮保存高清彩色照片
+
+### 支持格式
+- **文件类型**：JPG、JPEG、PNG
+- **文件大小**：最大 8MB
+- **输出格式**：高清 JPG
+
+## ⚙️ 开发命令
+
+```bash
+npm run dev       # 启动开发服务器
+npm run build     # 构建生产版本
+npm run start     # 启动生产服务器
+npm run lint      # 代码检查和格式化
+npm run format    # 代码格式化
 ```
 
 ## 🔧 配置说明
 
-### 环境变量
+### 环境变量（待配置）
 ```env
 # Replicate API（AI 服务）
 REPLICATE_API_TOKEN=your_replicate_token
@@ -116,41 +116,58 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ### 当前状态
-- ✅ 前端 UI 完成
-- 🚧 后端服务使用 Mock 数据（开发中）
-- 🚧 Replicate AI 服务集成（待配置）
-- 🚧 Supabase 存储服务（待配置）
+- ✅ **前端 UI** - 完整实现
+- ✅ **响应式设计** - 完美适配
+- ✅ **文件上传** - 支持验证和预览
+- ✅ **结果展示** - 滑块对比功能
+- 🚧 **AI 服务** - 使用 Mock 数据
+- 🚧 **云存储** - 使用本地 Blob URL
+- 🚧 **生产部署** - 待配置真实服务
 
 ## 🎨 设计特色
 
-- **现代化 UI**：采用紫色主题色，简洁优雅
-- **响应式设计**：完美适配桌面端和移动端
-- **流畅动画**：平滑的交互动画和状态转换
-- **用户体验**：直观的操作流程和反馈
+- **紫色主题**：现代化的紫色渐变设计
+- **流畅动画**：平滑的状态转换和加载动画
+- **直观交互**：清晰的操作流程和即时反馈
+- **移动优先**：响应式设计，移动端体验优良
 
-## 🔜 后续计划
+## 🔮 后续计划
 
-- [ ] 集成真实的 AI 上色服务
+- [ ] 集成真实 AI 着色服务（Replicate）
+- [ ] 配置云存储服务（Supabase）
 - [ ] 添加批量处理功能
 - [ ] 支持更多图片格式
-- [ ] 优化处理速度
+- [ ] 优化处理速度和效果
 - [ ] 添加用户账户系统
-- [ ] 提供上色风格选择
+- [ ] 提供多种着色风格选择
+- [ ] 添加图片历史记录
+- [ ] 支持图片分享功能
 
-## 📝 开发说明
+## 🚨 已知问题
 
-项目使用 Biome 进行代码检查和格式化，遵循严格的 TypeScript 类型检查。
+目前使用 Mock 数据进行演示：
+- AI 着色功能返回固定的演示图片
+- 文件上传使用本地 Blob URL
+- 处理时间为模拟延迟
 
-运行检查：
-```bash
-bun lint    # 代码检查
-bun format  # 代码格式化
-```
+## 🧪 开发注意事项
+
+### 代码规范
+- 使用 **Biome** 进行代码检查和格式化
+- 严格的 **TypeScript** 类型检查
+- 遵循 **React** 最佳实践
+
+### 构建优化
+- 使用 **React Server Components** 优化性能
+- 最小化客户端 JavaScript
+- 响应式图片和懒加载
 
 ## 📄 许可证
 
-MIT License - 详见 LICENSE 文件
+MIT License
 
 ---
 
-**让珍贵的回忆重新焕发光彩！** ✨
+**让珍贵的黑白回忆重新焕发色彩！** 🌈✨
+
+> 这是一个演示项目，展示了现代 Web 技术在 AI 图像处理领域的应用。适合学习 Next.js 15、TypeScript 和现代前端开发最佳实践。
