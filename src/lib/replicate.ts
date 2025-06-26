@@ -78,14 +78,21 @@ export async function getPrediction(id: string): Promise<PredictionResponse> {
   }
 }
 
-// Poll prediction with timeout and retry logic (方案A: 加长重试时间)
-export async function pollPrediction(id: string, maxAttempts = 60, intervalSeconds = 2.5): Promise<PredictionResponse> {
-  console.log('⏱️ [REPLICATE] Starting prediction polling...')
-  console.log('🔧 [REPLICATE] Poll config:', { id, maxAttempts, intervalSeconds })
-  console.log('⏰ [REPLICATE] Max wait time: ~', Math.ceil(maxAttempts * intervalSeconds), 'seconds')
+// Poll prediction with time-based timeout and exponential backoff
+export async function pollPrediction(id: string): Promise<PredictionResponse> {
+  console.log('⏱️ [REPLICATE] Starting prediction polling with time-based timeout...')
+  console.log('🆔 [REPLICATE] Prediction ID:', id)
   
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    console.log(`🔄 [REPLICATE] Poll attempt ${attempt}/${maxAttempts}`)
+  const startTime = Date.now()
+  const MAX_TIMEOUT = 10 * 60 * 1000 // 10 minutes in milliseconds
+  
+  console.log('⏰ [REPLICATE] Max wait time: 10 minutes')
+  
+  while (true) {
+    const elapsedTime = Date.now() - startTime
+    const elapsedSeconds = Math.floor(elapsedTime / 1000)
+    
+    console.log(`🔄 [REPLICATE] Polling... (${elapsedSeconds}s elapsed)`)
     
     try {
       const prediction = await getPrediction(id)
@@ -99,6 +106,7 @@ export async function pollPrediction(id: string, maxAttempts = 60, intervalSecon
       // Check if prediction is complete
       if (prediction.status === 'succeeded') {
         console.log('🎉 [REPLICATE] Prediction completed successfully!')
+        console.log(`⏱️ [REPLICATE] Total time: ${elapsedSeconds}s`)
         console.log('🖼️ [REPLICATE] Output URL:', prediction.output)
         return prediction
       }
@@ -115,30 +123,41 @@ export async function pollPrediction(id: string, maxAttempts = 60, intervalSecon
         throw new Error(`Prediction was canceled: ${prediction.error || 'Canceled by user or system'}`)
       }
       
-      // Still processing, wait and retry
-      console.log(`⏳ [REPLICATE] Prediction still ${prediction.status}, waiting ${intervalSeconds}s...`)
-      console.log(`⏱️ [REPLICATE] Elapsed time: ~${Math.ceil(attempt * intervalSeconds)}s / ~${Math.ceil(maxAttempts * intervalSeconds)}s`)
-      
-      if (attempt < maxAttempts) {
-        await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000))
+      // Check for timeout AFTER getting the status
+      if (elapsedTime > MAX_TIMEOUT) {
+        console.error('⏰ [REPLICATE] Prediction polling timeout!')
+        throw new Error(`Replicate still processing after 10 minutes. The image might be too large or complex. Try a smaller image or contact support.`)
       }
       
+      // Still processing, wait and retry with exponential backoff
+      // First minute: 3s intervals, after that: 6s intervals
+      const waitTime = elapsedTime < 60_000 ? 3000 : 6000
+      console.log(`⏳ [REPLICATE] Prediction still ${prediction.status}, waiting ${waitTime/1000}s...`)
+      console.log(`⏱️ [REPLICATE] Progress: ${elapsedSeconds}s / 600s (10 min max)`)
+      
+      await new Promise(resolve => setTimeout(resolve, waitTime))
+      
     } catch (error) {
-      // 如果是我们明确抛出的错误（failed/canceled），直接重新抛出
-      if (error instanceof Error && (error.message.includes('failed') || error.message.includes('canceled'))) {
+      // 如果是我们明确抛出的错误（failed/canceled/timeout），直接重新抛出
+      if (error instanceof Error && (
+        error.message.includes('failed') || 
+        error.message.includes('canceled') ||
+        error.message.includes('timeout') ||
+        error.message.includes('still processing')
+      )) {
         throw error
       }
       
-      console.error(`💥 [REPLICATE] Poll attempt ${attempt} failed:`, error)
-      if (attempt === maxAttempts) {
-        throw new Error(`Polling failed after ${maxAttempts} attempts: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      console.error(`💥 [REPLICATE] Poll request failed:`, error)
+      
+      // Check for timeout on network errors too
+      if (elapsedTime > MAX_TIMEOUT) {
+        throw new Error(`Network errors persisted for 10 minutes. Please try again later.`)
       }
-      // Wait before retry on network error
-      console.log(`🔄 [REPLICATE] Network error, retrying in ${intervalSeconds}s...`)
-      await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000))
+      
+      // Wait before retry on network error (shorter interval)
+      console.log(`🔄 [REPLICATE] Network error, retrying in 3s...`)
+      await new Promise(resolve => setTimeout(resolve, 3000))
     }
   }
-  
-  console.error('⏰ [REPLICATE] Prediction polling timeout!')
-  throw new Error(`Prediction timeout after ${maxAttempts} attempts (${Math.ceil(maxAttempts * intervalSeconds)}s). This usually means the image is large or complex - try a smaller image or contact support.`)
 }

@@ -11,6 +11,52 @@ import { createPrediction, pollPrediction } from "@/lib/replicate"
 
 type UploadState = 'idle' | 'uploading' | 'predicting' | 'success' | 'fail'
 
+// 图片压缩函数，确保长边不超过指定尺寸
+const compressImage = (file: File, maxSize: number): Promise<File> => {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')!
+    const img = new Image()
+    
+    img.onload = () => {
+      const { width, height } = img
+      
+      // 如果图片已经足够小，直接返回原文件
+      if (width <= maxSize && height <= maxSize) {
+        resolve(file)
+        return
+      }
+      
+      // 计算新尺寸，保持宽高比
+      const ratio = Math.min(maxSize / width, maxSize / height)
+      const newWidth = Math.floor(width * ratio)
+      const newHeight = Math.floor(height * ratio)
+      
+      canvas.width = newWidth
+      canvas.height = newHeight
+      
+      // 绘制压缩后的图片
+      ctx.drawImage(img, 0, 0, newWidth, newHeight)
+      
+      // 转换为blob，保持较高质量
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const compressedFile = new File([blob], file.name, {
+            type: file.type,
+            lastModified: Date.now()
+          })
+          console.log(`🖼️ [COMPRESS] ${width}x${height} → ${newWidth}x${newHeight} (${(file.size/1024/1024).toFixed(1)}MB → ${(compressedFile.size/1024/1024).toFixed(1)}MB)`)
+          resolve(compressedFile)
+        } else {
+          resolve(file)
+        }
+      }, file.type, 0.9) // 90% 质量
+    }
+    
+    img.src = URL.createObjectURL(file)
+  })
+}
+
 interface PredictionResult {
   status: string
   output?: string
@@ -26,8 +72,11 @@ export default function UploadZone() {
     try {
       setState('uploading')
 
+      // 压缩图片以确保长边 ≤ 2048px，提高处理速度
+      const compressedFile = await compressImage(file, 2048)
+      
       // Upload to storage (stub)
-      const uploadedUrl = await uploadToStorage(file)
+      const uploadedUrl = await uploadToStorage(compressedFile)
       setOriginalImage(uploadedUrl)
 
       setState('predicting')
@@ -155,7 +204,7 @@ export default function UploadZone() {
               <>
                 <Loader size={48} />
                 <p className="text-lg font-medium text-purple-600">AI 上色中...</p>
-                <p className="text-sm text-muted-foreground">大约需要 60 秒，请耐心等待</p>
+                <p className="text-sm text-muted-foreground">大约需要 30-90 秒，大图需要更长时间</p>
               </>
             )}
 

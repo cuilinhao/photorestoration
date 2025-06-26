@@ -29,7 +29,8 @@ export async function POST(request: NextRequest) {
       version: MODEL_VERSION,
       input: {
         model_name: 'Artistic',
-        input_image: imageUrl
+        input_image: imageUrl,
+        render_factor: 30  // 降低从默认35到30，加快处理速度，肉眼差别小
       }
     }
 
