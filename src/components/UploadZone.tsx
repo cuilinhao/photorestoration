@@ -1,13 +1,15 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import { Upload, Image as ImageIcon } from "lucide-react"
 import { toast } from "sonner"
 import Loader from "./Loader"
 import ResultSlider from "./ResultSlider"
+import ProgressBar from "./ProgressBar"
 import { uploadToStorage } from "@/lib/supabase"
-import { createPrediction, pollPrediction } from "@/lib/replicate"
+import { createPrediction, getPrediction } from "@/lib/replicate"
+import { useReplicateProgress } from "@/hooks/useReplicateProgress"
 
 type UploadState = 'idle' | 'uploading' | 'predicting' | 'success' | 'fail'
 
@@ -66,38 +68,71 @@ export default function UploadZone() {
   const [state, setState] = useState<UploadState>('idle')
   const [originalImage, setOriginalImage] = useState<string>('')
   const [colorizedImage, setColorizedImage] = useState<string>('')
-  const [predictionId, setPredictionId] = useState<string>('')
+  const [predictionId, setPredictionId] = useState<string | null>(null)
+
+  console.log('🎯 [UPLOAD] UploadZone render, state:', state, 'predictionId:', predictionId)
+
+  // 使用新的进度Hook
+  const { percent, status } = useReplicateProgress(predictionId)
+  
+  console.log('📊 [UPLOAD] Progress Hook result - percent:', percent, 'status:', status)
+
+  // 监听状态变化，自动更新UI状态
+  useEffect(() => {
+    if (predictionId && status === 'succeeded') {
+      // 获取最终结果
+      getPrediction(predictionId).then((result) => {
+        if (result.output) {
+          setColorizedImage(result.output)
+          setState('success')
+          toast.success('AI 上色完成！')
+        }
+      }).catch(() => {
+        setState('fail')
+        toast.error('获取结果失败')
+      })
+    } else if (predictionId && (status === 'failed' || status === 'canceled')) {
+      setState('fail')
+      toast.error('处理失败，请重试')
+      setTimeout(() => setState('idle'), 3000)
+    }
+  }, [predictionId, status])
 
   const processFile = useCallback(async (file: File) => {
     try {
+      console.log('🚀 [UPLOAD] Starting processFile with file:', file.name, file.size, 'bytes')
       setState('uploading')
 
       // 压缩图片以确保长边 ≤ 2048px，提高处理速度
+      console.log('🖼️ [UPLOAD] Compressing image...')
       const compressedFile = await compressImage(file, 2048)
+      console.log('✅ [UPLOAD] Image compressed:', compressedFile.size, 'bytes')
       
       // Upload to storage (stub)
+      console.log('☁️ [UPLOAD] Uploading to storage...')
       const uploadedUrl = await uploadToStorage(compressedFile)
+      console.log('✅ [UPLOAD] Upload complete, URL:', uploadedUrl)
       setOriginalImage(uploadedUrl)
 
+      console.log('🎯 [UPLOAD] Switching to predicting state...')
       setState('predicting')
 
       // Create prediction
+      console.log('🤖 [UPLOAD] Creating Replicate prediction...')
       const prediction = await createPrediction(uploadedUrl)
+      console.log('✅ [UPLOAD] Prediction created successfully!')
+      console.log('🆔 [UPLOAD] Prediction ID:', prediction.id)
+      console.log('📊 [UPLOAD] Full prediction response:', JSON.stringify(prediction, null, 2))
+      
+      console.log('💾 [UPLOAD] Setting predictionId state...')
       setPredictionId(prediction.id)
+      console.log('✅ [UPLOAD] PredictionId state set, Hook should start polling now')
 
-      // Poll for result
-      const result = await pollPrediction(prediction.id)
-
-      if (result.status === 'succeeded' && result.output) {
-        setColorizedImage(result.output)
-        setState('success')
-        toast.success('AI 上色完成！')
-      } else {
-        throw new Error(`Prediction failed: ${result.error || 'Unknown error'}`)
-      }
+      // 现在进度Hook会自动开始轮询
 
     } catch (error) {
-      console.error('Processing error:', error)
+      console.error('💥 [UPLOAD] Processing error:', error)
+      console.error('💥 [UPLOAD] Error stack:', error instanceof Error ? error.stack : 'No stack')
       setState('fail')
       toast.error('处理失败，请重试')
       setTimeout(() => setState('idle'), 3000)
@@ -148,7 +183,7 @@ export default function UploadZone() {
     setState('idle')
     setOriginalImage('')
     setColorizedImage('')
-    setPredictionId('')
+    setPredictionId(null)
 
     // Scroll back to top
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -202,9 +237,11 @@ export default function UploadZone() {
 
             {state === 'predicting' && (
               <>
-                <Loader size={48} />
+                <ProgressBar percent={percent} className="mb-4" />
                 <p className="text-lg font-medium text-purple-600">AI 上色中...</p>
-                <p className="text-sm text-muted-foreground">大约需要 30-90 秒，大图需要更长时间</p>
+                <p className="text-sm text-muted-foreground">
+                  {percent > 0 ? `正在处理第 ${percent}% 步骤` : '正在初始化模型...'}
+                </p>
               </>
             )}
 

@@ -21,29 +21,50 @@ export async function createPrediction(imageUrl: string): Promise<PredictionResp
   console.log('🖼️ [REPLICATE] Image URL:', imageUrl)
 
   try {
+    const requestBody = { imageUrl };
+    console.log('📝 [REPLICATE] Request body:', JSON.stringify(requestBody, null, 2))
+    
     const response = await fetch('/api/colorize', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ imageUrl })
+      body: JSON.stringify(requestBody)
     })
 
     console.log('📨 [REPLICATE] API response status:', response.status)
+    console.log('📨 [REPLICATE] API response headers:', Object.fromEntries(response.headers.entries()))
 
     if (!response.ok) {
-      const errorData = await response.json()
-      console.error('❌ [REPLICATE] API error:', errorData)
+      const errorText = await response.text()
+      console.error('❌ [REPLICATE] API error response text:', errorText)
+      let errorData;
+      try {
+        errorData = JSON.parse(errorText)
+      } catch {
+        errorData = { error: errorText }
+      }
+      console.error('❌ [REPLICATE] API error data:', errorData)
       throw new Error(errorData.error || `API error: ${response.status}`)
     }
 
     const data = await response.json()
     console.log('✅ [REPLICATE] Prediction created successfully!')
-    console.log('📊 [REPLICATE] Response data:', data)
+    console.log('📊 [REPLICATE] Response data:', JSON.stringify(data, null, 2))
+    
+    // 验证返回的数据结构
+    if (!data.id) {
+      console.error('❌ [REPLICATE] Missing prediction ID in response!')
+      throw new Error('Invalid response: missing prediction ID')
+    }
+    
+    console.log('🆔 [REPLICATE] Extracted prediction ID:', data.id)
     return data
 
   } catch (error) {
     console.error('💥 [REPLICATE] Create prediction error:', error)
+    console.error('💥 [REPLICATE] Error type:', typeof error)
+    console.error('💥 [REPLICATE] Error message:', error instanceof Error ? error.message : String(error))
     throw error
   }
 }
