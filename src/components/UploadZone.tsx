@@ -10,7 +10,7 @@ import ProgressBar from "./ProgressBar"
 import { useImageRestore } from "@/hooks/useImageRestore"
 
 export default function UploadZone() {
-  const { status, originalImage, restoredImage, progress, error, processImage, reset } = useImageRestore()
+  const { status, originalImage, restoredImage, progress, error, processImage, reset, downloadImage } = useImageRestore()
 
   // 文件验证和处理
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -41,15 +41,12 @@ export default function UploadZone() {
   })
 
   // 下载处理
-  const handleDownload = () => {
-    if (restoredImage) {
-      const link = document.createElement('a')
-      link.href = restoredImage
-      link.download = 'restored_photo.jpg'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+  const handleDownload = async () => {
+    try {
+      await downloadImage()
       toast.success('图片下载成功！')
+    } catch (error) {
+      toast.error('下载失败，请重试')
     }
   }
 

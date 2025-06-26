@@ -7,7 +7,11 @@ import { Button } from "@/components/ui/button"
 
 export default function DebugPage() {
   const [status, setStatus] = useState<string>('ready')
-  const [result, setResult] = useState<any>(null)
+  const [result, setResult] = useState<{
+    type: 'create' | 'get' | 'parse' | 'error' | 'download'
+    data?: unknown
+    error?: string
+  } | null>(null)
 
   const testAPI = async () => {
     setStatus('testing...')
@@ -52,6 +56,36 @@ export default function DebugPage() {
     setStatus('success')
   }
 
+  // 测试下载功能
+  const testDownload = async () => {
+    setStatus('testing...')
+    try {
+      // 使用一个测试图片URL
+      const testImageUrl = 'https://replicate.delivery/xezq/Op9pzTCgfNWCX6t8DiJ2thf9bJAYWnRIi08cvfwyLyWfA3qTB/tmp6mx1b6ch.jpg'
+      
+      const response = await fetch(testImageUrl)
+      if (!response.ok) throw new Error('获取图片失败')
+      
+      const blob = await response.blob()
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `test_download_${Date.now()}.jpg`
+      
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      URL.revokeObjectURL(url)
+      
+      setResult({ type: 'download', data: { success: true, message: '下载测试完成' } })
+      setStatus('success')
+    } catch (error) {
+      setResult({ type: 'error', error: error instanceof Error ? error.message : 'Unknown error' })
+      setStatus('error')
+    }
+  }
+
   return (
     <div className="container mx-auto p-8">
       <h1 className="text-2xl font-bold mb-6 text-center">API Debug</h1>
@@ -67,6 +101,10 @@ export default function DebugPage() {
         
         <Button onClick={testParseLog} className="w-full">
           Test Log Parser
+        </Button>
+
+        <Button onClick={testDownload} className="w-full bg-green-600 hover:bg-green-700">
+          Test Download Function
         </Button>
         
         <div className="mt-6">

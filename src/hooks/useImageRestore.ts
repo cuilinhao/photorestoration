@@ -143,9 +143,42 @@ export function useImageRestore() {
     })
   }
 
+  // 下载图片到本地
+  const downloadImage = async () => {
+    if (!state.restoredImage) return
+
+    try {
+      // 获取图片数据
+      const response = await fetch(state.restoredImage)
+      if (!response.ok) throw new Error('下载失败')
+      
+      // 转换为blob
+      const blob = await response.blob()
+      
+      // 创建下载链接
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `restored_photo_${Date.now()}.jpg`
+      
+      // 触发下载
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // 清理blob URL
+      URL.revokeObjectURL(url)
+      
+    } catch (error) {
+      console.error('下载失败:', error)
+      throw new Error('下载失败，请重试')
+    }
+  }
+
   return {
     ...state,
     processImage,
-    reset
+    reset,
+    downloadImage
   }
 } 
