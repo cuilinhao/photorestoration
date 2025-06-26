@@ -12,44 +12,44 @@ export default function HeroSlider() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row items-center justify-between bg-gradient-to-b from-zinc-50 to-white px-6 lg:px-12">
+    <div className="flex flex-col lg:flex-row items-center justify-between bg-gradient-to-b from-zinc-50 to-white px-6 lg:px-12 py-12 lg:py-16">
       {/* Left side - Text content */}
-      <div className="w-full lg:w-1/2 space-y-8 text-center lg:text-left">
-        <div className="space-y-4">
-          <h1 className="text-4xl lg:text-6xl font-extrabold tracking-tight text-gray-900">
+      <div className="w-full lg:w-1/2 space-y-6 text-center lg:text-left">
+        <div className="space-y-3">
+          <h1 className="text-3xl lg:text-5xl font-extrabold tracking-tight text-gray-900">
             ColorOld
           </h1>
-          <h2 className="text-2xl lg:text-3xl font-bold text-purple-600">
-            老照片 AI 上色
+          <h2 className="text-xl lg:text-2xl font-bold text-purple-600">
+            老照片 AI 修复与上色
           </h2>
-          <p className="text-lg text-muted-foreground max-w-lg">
-            60 秒内让灰阶/褪色照片变 2K 彩照，AI 智能上色技术让珍贵回忆重新焕发光彩
+          <p className="text-base lg:text-lg text-muted-foreground max-w-lg">
+            60 秒内让灰阶/褪色照片变 2K 彩照，FLUX AI 智能修复技术让珍贵回忆重新焕发光彩
           </p>
         </div>
 
         <Button
           onClick={scrollToUploader}
-          className="h-12 px-8 text-lg rounded-xl bg-purple-600 text-white hover:bg-purple-700"
+          className="h-11 px-6 text-base rounded-xl bg-purple-600 text-white hover:bg-purple-700 transition-colors"
         >
-          立即尝试
+          🚀 立即尝试
         </Button>
       </div>
 
       {/* Right side - Demo slider */}
-      <div className="w-full lg:w-1/2 mt-12 lg:mt-0">
-        <div className="aspect-[3/2] lg:aspect-[3/2] max-w-lg mx-auto">
+      <div className="w-full lg:w-1/2 mt-8 lg:mt-0">
+        <div className="aspect-[4/3] max-w-md mx-auto">
           <ReactCompareImage
             leftImage="/demo/old_photo_bw.jpg"
             rightImage="/demo/old_photo_color.jpg"
             sliderLineColor="#7C3AED"
-            sliderLineWidth={4}
+            sliderLineWidth={3}
             handle={
-              <div className="w-8 h-8 rounded-full bg-purple-600 border-4 border-white shadow-lg" />
+              <div className="w-6 h-6 rounded-full bg-purple-600 border-2 border-white shadow-lg" />
             }
           />
         </div>
-        <p className="text-center text-sm text-muted-foreground mt-4">
-          拖动滑块查看效果对比
+        <p className="text-center text-xs text-muted-foreground mt-3">
+          👆 拖动滑块查看修复效果
         </p>
       </div>
     </div>

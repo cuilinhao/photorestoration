@@ -64,7 +64,7 @@ export default function UploadZone() {
   // 成功状态：显示对比结果
   if (status === 'success') {
     return (
-      <div id="uploader" className="py-16 px-6">
+      <div id="uploader" className="py-12 px-6">
         <ResultComparison
           originalImage={originalImage}
           colorizedImage={restoredImage}
@@ -77,13 +77,13 @@ export default function UploadZone() {
 
   // 上传界面
   return (
-    <div id="uploader" className="py-16 px-6">
+    <div id="uploader" className="py-12 px-6">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
             上传你的老照片
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-base text-muted-foreground">
             支持 JPG、PNG 格式，最大 8MB
           </p>
         </div>
