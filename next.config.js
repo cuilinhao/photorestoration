@@ -2,7 +2,8 @@
 const nextConfig = {
   // 注释掉静态导出配置，因为我们需要 API 路由
   // output: 'export',
-  distDir: 'out',
+  // 移除 distDir 配置，使用默认的 .next 目录
+  // distDir: 'out',
   images: {
     unoptimized: true,
     domains: [
