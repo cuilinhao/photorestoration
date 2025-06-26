@@ -6,6 +6,7 @@ import { Upload, Image as ImageIcon } from "lucide-react"
 import { toast } from "sonner"
 import Loader from "./Loader"
 import ResultSlider from "./ResultSlider"
+import ResultComparison from "./ResultComparison"
 import ProgressBar from "./ProgressBar"
 import { uploadToStorage } from "@/lib/supabase"
 import { createPrediction, getPrediction } from "@/lib/replicate"
@@ -192,7 +193,7 @@ export default function UploadZone() {
   if (state === 'success') {
     return (
       <div id="uploader" className="py-16 px-6">
-        <ResultSlider
+        <ResultComparison
           originalImage={originalImage}
           colorizedImage={colorizedImage}
           onDownload={handleDownload}
