@@ -30,7 +30,7 @@ export default function ProgressBar({ percent, className = "" }: ProgressBarProp
       {/* 进度描述 */}
       <div className="text-center mt-2">
         <span className="text-sm text-gray-600">
-          AI 正在为您的照片上色...
+          AI 正在修复并为您的照片上色...
         </span>
       </div>
     </div>

@@ -10,7 +10,7 @@ export default function DebugPage() {
     setIsLoading(true)
     try {
       // 测试创建预测
-      const response = await fetch('/api/colorize', {
+      const response = await fetch('/api/restore', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -44,7 +44,7 @@ export default function DebugPage() {
 
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/colorize/${testResult.data.id}`)
+      const response = await fetch(`/api/restore/${testResult.data.id}`)
       const data = await response.json()
       
       setTestResult((prev: any) => ({

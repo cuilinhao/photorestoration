@@ -30,7 +30,7 @@ export function useReplicateProgress(id: string | null) {
       console.log(`🔍 [PROGRESS] Polling prediction ${id}...`);
       
       try {
-        const url = `/api/colorize/${id}`;
+        const url = `/api/restore/${id}`;
         console.log("📡 [PROGRESS] Fetching URL:", url);
         
         const res = await fetch(url);

@@ -189,27 +189,27 @@ export default function ResultComparison({
       {/* 结果信息 */}
       <div className="text-center space-y-2 pt-4 border-t">
         <p className="text-xl font-semibold text-gray-900">
-          🎉 AI 上色完成！
+          🎉 AI 修复与上色完成！
         </p>
         <p className="text-gray-600 max-w-2xl mx-auto">
           {viewMode === 'side-by-side' 
-            ? '左右对比查看上色效果，可以清楚看到色彩的变化。AI 智能识别并还原了照片中的自然色彩。'
-            : '拖动滑块查看前后对比效果，体验 AI 上色技术的神奇魅力。'
+            ? '左右对比查看修复与上色效果，可以清楚看到照片的品质提升和色彩变化。FLUX 技术智能修复损坏并还原自然色彩。'
+            : '拖动滑块查看前后对比效果，体验 FLUX AI 修复与上色技术的神奇魅力。'
           }
         </p>
         <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500 pt-3">
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-            <span>高清还原</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-            <span>自然上色</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-            <span>一键下载</span>
-          </div>
+                     <div className="flex items-center gap-1">
+             <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+             <span>智能修复</span>
+           </div>
+           <div className="flex items-center gap-1">
+             <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+             <span>高清上色</span>
+           </div>
+           <div className="flex items-center gap-1">
+             <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+             <span>FLUX 驱动</span>
+           </div>
         </div>
       </div>
     </div>

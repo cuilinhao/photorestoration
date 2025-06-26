@@ -86,7 +86,7 @@ export default function UploadZone() {
         if (result.output) {
           setColorizedImage(result.output)
           setState('success')
-          toast.success('AI 上色完成！')
+          toast.success('AI 修复与上色完成！')
         }
       }).catch(() => {
         setState('fail')
@@ -119,11 +119,11 @@ export default function UploadZone() {
       setState('predicting')
 
       // Create prediction
-      console.log('🤖 [UPLOAD] Creating Replicate prediction...')
-      const prediction = await createPrediction(uploadedUrl)
-      console.log('✅ [UPLOAD] Prediction created successfully!')
-      console.log('🆔 [UPLOAD] Prediction ID:', prediction.id)
-      console.log('📊 [UPLOAD] Full prediction response:', JSON.stringify(prediction, null, 2))
+              console.log('🤖 [UPLOAD] Creating Replicate restoration prediction...')
+        const prediction = await createPrediction(uploadedUrl)
+        console.log('✅ [UPLOAD] Restoration prediction created successfully!')
+        console.log('🆔 [UPLOAD] Prediction ID:', prediction.id)
+        console.log('📊 [UPLOAD] Full prediction response:', JSON.stringify(prediction, null, 2))
       
       console.log('💾 [UPLOAD] Setting predictionId state...')
       setPredictionId(prediction.id)
@@ -239,9 +239,9 @@ export default function UploadZone() {
             {state === 'predicting' && (
               <>
                 <ProgressBar percent={percent} className="mb-4" />
-                <p className="text-lg font-medium text-purple-600">AI 上色中...</p>
+                <p className="text-lg font-medium text-purple-600">AI 修复与上色中...</p>
                 <p className="text-sm text-muted-foreground">
-                  {percent > 0 ? `正在处理第 ${percent}% 步骤` : '正在初始化模型...'}
+                  {percent > 0 ? `正在处理第 ${percent}% 步骤` : '正在初始化 FLUX 模型...'}
                 </p>
               </>
             )}

@@ -17,14 +17,14 @@ interface PredictionResponse {
 }
 
 export async function createPrediction(imageUrl: string): Promise<PredictionResponse> {
-  console.log('🚀 [REPLICATE] Creating prediction via API route...')
+  console.log('🚀 [REPLICATE] Creating restoration prediction via API route...')
   console.log('🖼️ [REPLICATE] Image URL:', imageUrl)
 
   try {
     const requestBody = { imageUrl };
     console.log('📝 [REPLICATE] Request body:', JSON.stringify(requestBody, null, 2))
     
-    const response = await fetch('/api/colorize', {
+    const response = await fetch('/api/restore', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -49,7 +49,7 @@ export async function createPrediction(imageUrl: string): Promise<PredictionResp
     }
 
     const data = await response.json()
-    console.log('✅ [REPLICATE] Prediction created successfully!')
+    console.log('✅ [REPLICATE] Restoration prediction created successfully!')
     console.log('📊 [REPLICATE] Response data:', JSON.stringify(data, null, 2))
     
     // 验证返回的数据结构
@@ -62,7 +62,7 @@ export async function createPrediction(imageUrl: string): Promise<PredictionResp
     return data
 
   } catch (error) {
-    console.error('💥 [REPLICATE] Create prediction error:', error)
+    console.error('💥 [REPLICATE] Create restoration prediction error:', error)
     console.error('💥 [REPLICATE] Error type:', typeof error)
     console.error('💥 [REPLICATE] Error message:', error instanceof Error ? error.message : String(error))
     throw error
@@ -70,11 +70,11 @@ export async function createPrediction(imageUrl: string): Promise<PredictionResp
 }
 
 export async function getPrediction(id: string): Promise<PredictionResponse> {
-  console.log('🔍 [REPLICATE] Getting prediction status via API route...')
+  console.log('🔍 [REPLICATE] Getting restoration prediction status via API route...')
   console.log('🆔 [REPLICATE] Prediction ID:', id)
   
   try {
-    const response = await fetch(`/api/colorize/${id}`, {
+    const response = await fetch(`/api/restore/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -90,11 +90,11 @@ export async function getPrediction(id: string): Promise<PredictionResponse> {
     }
 
     const data = await response.json()
-    console.log('📊 [REPLICATE] Prediction status:', data.status)
+    console.log('📊 [REPLICATE] Restoration prediction status:', data.status)
     return data
 
   } catch (error) {
-    console.error('💥 [REPLICATE] Get prediction error:', error)
+    console.error('💥 [REPLICATE] Get restoration prediction error:', error)
     throw error
   }
 }
