@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ColorOld • 老照片 AI 上色",
+  title: "Photo Restoration AI",
   description: "60 秒内让灰阶/褪色照片变 2K 彩照，AI 智能上色技术让珍贵回忆重新焕发光彩",
 };
 
