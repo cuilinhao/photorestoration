@@ -78,16 +78,23 @@ export async function getPrediction(id: string): Promise<PredictionResponse> {
   }
 }
 
-// Poll prediction with timeout and retry logic
-export async function pollPrediction(id: string, maxAttempts = 30, intervalSeconds = 3): Promise<PredictionResponse> {
+// Poll prediction with timeout and retry logic (方案A: 加长重试时间)
+export async function pollPrediction(id: string, maxAttempts = 60, intervalSeconds = 2.5): Promise<PredictionResponse> {
   console.log('⏱️ [REPLICATE] Starting prediction polling...')
   console.log('🔧 [REPLICATE] Poll config:', { id, maxAttempts, intervalSeconds })
+  console.log('⏰ [REPLICATE] Max wait time: ~', Math.ceil(maxAttempts * intervalSeconds), 'seconds')
   
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     console.log(`🔄 [REPLICATE] Poll attempt ${attempt}/${maxAttempts}`)
     
     try {
       const prediction = await getPrediction(id)
+      
+      // 改善调试：显示更多状态信息
+      console.log(`📊 [REPLICATE] Status: ${prediction.status}`)
+      if (prediction.error) {
+        console.log(`⚠️ [REPLICATE] Error details:`, prediction.error)
+      }
       
       // Check if prediction is complete
       if (prediction.status === 'succeeded') {
@@ -96,30 +103,42 @@ export async function pollPrediction(id: string, maxAttempts = 30, intervalSecon
         return prediction
       }
       
-      if (prediction.status === 'failed' || prediction.status === 'canceled') {
+      // 明确区分失败状态，避免混淆
+      if (prediction.status === 'failed') {
         console.error('❌ [REPLICATE] Prediction failed!')
         console.error('❌ [REPLICATE] Error details:', prediction.error)
-        throw new Error(`Prediction ${prediction.status}: ${prediction.error || 'Unknown error'}`)
+        throw new Error(`Prediction failed: ${prediction.error || 'Unknown error from Replicate'}`)
+      }
+      
+      if (prediction.status === 'canceled') {
+        console.error('🚫 [REPLICATE] Prediction was canceled!')
+        throw new Error(`Prediction was canceled: ${prediction.error || 'Canceled by user or system'}`)
       }
       
       // Still processing, wait and retry
       console.log(`⏳ [REPLICATE] Prediction still ${prediction.status}, waiting ${intervalSeconds}s...`)
+      console.log(`⏱️ [REPLICATE] Elapsed time: ~${Math.ceil(attempt * intervalSeconds)}s / ~${Math.ceil(maxAttempts * intervalSeconds)}s`)
       
       if (attempt < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000))
       }
       
     } catch (error) {
-      console.error(`💥 [REPLICATE] Poll attempt ${attempt} failed:`, error)
-      if (attempt === maxAttempts) {
+      // 如果是我们明确抛出的错误（failed/canceled），直接重新抛出
+      if (error instanceof Error && (error.message.includes('failed') || error.message.includes('canceled'))) {
         throw error
       }
-      // Wait before retry on error
-      console.log(`🔄 [REPLICATE] Retrying in ${intervalSeconds}s...`)
+      
+      console.error(`💥 [REPLICATE] Poll attempt ${attempt} failed:`, error)
+      if (attempt === maxAttempts) {
+        throw new Error(`Polling failed after ${maxAttempts} attempts: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      }
+      // Wait before retry on network error
+      console.log(`🔄 [REPLICATE] Network error, retrying in ${intervalSeconds}s...`)
       await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000))
     }
   }
   
   console.error('⏰ [REPLICATE] Prediction polling timeout!')
-  throw new Error(`Prediction timeout after ${maxAttempts} attempts`)
+  throw new Error(`Prediction timeout after ${maxAttempts} attempts (${Math.ceil(maxAttempts * intervalSeconds)}s). This usually means the image is large or complex - try a smaller image or contact support.`)
 }
