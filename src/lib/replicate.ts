@@ -1,74 +1,45 @@
-const REPLICATE_API_TOKEN = process.env.REPLICATE_API_TOKEN!
-const REPLICATE_API_BASE = 'https://api.replicate.com/v1'
-
-// Model version for the colorization model
-const MODEL_VERSION = '0da600fab0c45a66211339f1c16b71345d22f26ef5fea3dca1bb90bb5711e950'
-
+// 修改为使用本地 API 路由，避免在前端暴露 API Token
 interface PredictionResponse {
   id: string
   status: 'starting' | 'processing' | 'succeeded' | 'failed' | 'canceled'
-  input: {
+  input?: {
     model_name: string
     input_image: string
   }
   output?: string
   error?: string
   logs?: string
-  created_at: string
-  urls: {
+  created_at?: string
+  urls?: {
     get: string
     cancel: string
   }
 }
 
 export async function createPrediction(imageUrl: string): Promise<PredictionResponse> {
-  console.log('🚀 [REPLICATE] Creating prediction...')
+  console.log('🚀 [REPLICATE] Creating prediction via API route...')
   console.log('🖼️ [REPLICATE] Image URL:', imageUrl)
-  console.log('🔧 [REPLICATE] Config:', {
-    apiBase: REPLICATE_API_BASE,
-    modelVersion: MODEL_VERSION,
-    apiToken: REPLICATE_API_TOKEN ? `${REPLICATE_API_TOKEN.substring(0, 10)}...` : 'NOT SET'
-  })
-
-  const requestBody = {
-    version: MODEL_VERSION,
-    input: {
-      model_name: 'Artistic',
-      input_image: imageUrl
-    }
-  }
-
-  console.log('📝 [REPLICATE] Request body:', JSON.stringify(requestBody, null, 2))
 
   try {
-    const headers = {
-      'Authorization': `Token ${REPLICATE_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-    
-    console.log('📤 [REPLICATE] Request headers:', {
-      ...headers,
-      'Authorization': `Token ${REPLICATE_API_TOKEN.substring(0, 10)}...`
-    })
-    
-    const response = await fetch(`${REPLICATE_API_BASE}/predictions`, {
+    const response = await fetch('/api/colorize', {
       method: 'POST',
-      headers,
-      body: JSON.stringify(requestBody)
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ imageUrl })
     })
 
-    console.log('📨 [REPLICATE] Response status:', response.status, response.statusText)
-    console.log('📨 [REPLICATE] Response headers:', Object.fromEntries(response.headers.entries()))
+    console.log('📨 [REPLICATE] API response status:', response.status)
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ [REPLICATE] API error response:', errorText)
-      throw new Error(`Failed to create prediction: ${response.status} - ${errorText}`)
+      const errorData = await response.json()
+      console.error('❌ [REPLICATE] API error:', errorData)
+      throw new Error(errorData.error || `API error: ${response.status}`)
     }
 
     const data = await response.json()
     console.log('✅ [REPLICATE] Prediction created successfully!')
-    console.log('📊 [REPLICATE] Response data:', JSON.stringify(data, null, 2))
+    console.log('📊 [REPLICATE] Response data:', data)
     return data
 
   } catch (error) {
@@ -78,37 +49,27 @@ export async function createPrediction(imageUrl: string): Promise<PredictionResp
 }
 
 export async function getPrediction(id: string): Promise<PredictionResponse> {
-  console.log('🔍 [REPLICATE] Getting prediction status...')
+  console.log('🔍 [REPLICATE] Getting prediction status via API route...')
   console.log('🆔 [REPLICATE] Prediction ID:', id)
   
   try {
-    const headers = {
-      'Authorization': `Token ${REPLICATE_API_TOKEN}`,
-      'Content-Type': 'application/json'
-    }
-    
-    console.log('📤 [REPLICATE] Request URL:', `${REPLICATE_API_BASE}/predictions/${id}`)
-    console.log('📤 [REPLICATE] Request headers:', {
-      ...headers,
-      'Authorization': `Token ${REPLICATE_API_TOKEN.substring(0, 10)}...`
-    })
-    
-    const response = await fetch(`${REPLICATE_API_BASE}/predictions/${id}`, {
+    const response = await fetch(`/api/colorize/${id}`, {
       method: 'GET',
-      headers
+      headers: {
+        'Content-Type': 'application/json'
+      }
     })
 
-    console.log('📨 [REPLICATE] Response status:', response.status, response.statusText)
+    console.log('📨 [REPLICATE] API response status:', response.status)
 
     if (!response.ok) {
-      const errorText = await response.text()
-      console.error('❌ [REPLICATE] API error response:', errorText)
-      throw new Error(`Failed to get prediction: ${response.status} - ${errorText}`)
+      const errorData = await response.json()
+      console.error('❌ [REPLICATE] API error:', errorData)
+      throw new Error(errorData.error || `API error: ${response.status}`)
     }
 
     const data = await response.json()
     console.log('📊 [REPLICATE] Prediction status:', data.status)
-    console.log('📊 [REPLICATE] Full response:', JSON.stringify(data, null, 2))
     return data
 
   } catch (error) {
