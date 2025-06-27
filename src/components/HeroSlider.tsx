@@ -4,8 +4,11 @@ import ReactCompareImage from "react-compare-image"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Star } from "lucide-react"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function HeroSlider() {
+  const { t } = useLanguage()
+  
   const scrollToUploader = () => {
     const uploaderElement = document.getElementById('uploader')
     if (uploaderElement) {
@@ -23,21 +26,21 @@ export default function HeroSlider() {
           {/* Product Hunt Badge */}
           <div className="flex items-center justify-center mb-8">
             <Badge variant="outline" className="px-3 py-1 text-sm font-medium">
-              🏆 AI 照片修复领域佼佼者
+              {t('hero.badge')}
             </Badge>
           </div>
 
           {/* Main Title */}
           <h1 className="mx-auto mb-3 mt-4 max-w-6xl text-balance text-4xl font-bold lg:mb-7 lg:text-7xl">
-            让老照片
+            {t('hero.title')}
             <span className="bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent">
-              重获新生
+              {t('hero.titleHighlight')}
             </span>
           </h1>
 
           {/* Subtitle */}
           <p className="mx-auto max-w-3xl text-muted-foreground lg:text-xl mb-8">
-            60 秒内让灰阶/褪色照片变 2K 彩照，<strong>FLUX AI</strong> 智能修复技术让珍贵回忆重新焕发光彩
+            {t('hero.subtitle')}
           </p>
 
           {/* CTA Button */}
@@ -47,7 +50,7 @@ export default function HeroSlider() {
               size="lg"
               className="h-14 px-8 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              🚀 立即开始修复
+              {t('hero.cta')}
             </Button>
           </div>
 
@@ -68,7 +71,7 @@ export default function HeroSlider() {
                 <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               ))}
             </div>
-            <span>已有 <strong>10,000+</strong> 用户信赖</span>
+            <span>{t('hero.users')} <strong>10,000+</strong> {t('hero.usersTrust')}</span>
           </div>
         </div>
 
@@ -106,7 +109,7 @@ export default function HeroSlider() {
             </div>
           </div>
           <p className="text-center text-sm text-muted-foreground mt-6">
-            👆 拖动滑块查看 AI 修复效果
+            {t('hero.dragTip')}
           </p>
         </div>
       </div>

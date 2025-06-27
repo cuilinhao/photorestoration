@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import Loader from "./Loader"
 import ResultComparison from "./ResultComparison"
 import ProgressBar from "./ProgressBar"
-import LoginModal from "./LoginModal"
+import AuthModal from "./AuthModal"
 import { useImageRestore } from "@/hooks/useImageRestore"
 import { useUser } from "@/contexts/UserContext"
 import { useLanguage } from "@/contexts/LanguageContext"
@@ -278,11 +278,10 @@ export default function UploadZone() {
       </div>
     </section>
 
-    {/* Login Modal */}
-    <LoginModal 
+    {/* Auth Modal */}
+    <AuthModal 
       isOpen={showLoginModal}
       onClose={() => setShowLoginModal(false)}
-      language={language}
     />
     </>
   )

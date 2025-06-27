@@ -6,7 +6,6 @@ import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function Footer() {
   const { t } = useLanguage()
-  
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId)
     if (element) {
@@ -90,7 +89,7 @@ export default function Footer() {
 
           {/* Support Links */}
           <div>
-            <h3 className="font-semibold mb-4">{t('footer.support')}</h3>
+            <h3 className="font-semibold mb-4">{t('footer.support')}
             <ul className="space-y-3 text-sm">
               <li>
                 <button 

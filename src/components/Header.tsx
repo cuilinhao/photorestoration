@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge"
 import { Menu, Moon, Sun, Globe, LogIn, User, LogOut } from "lucide-react"
 import { useUser } from "@/contexts/UserContext"
 import { useLanguage } from "@/contexts/LanguageContext"
-import LoginModal from "@/components/LoginModal"
+import AuthModal from "@/components/AuthModal"
 
 export default function Header() {
   const [isDark, setIsDark] = useState(false)
@@ -215,11 +215,10 @@ export default function Header() {
       )}
       </header>
 
-      {/* Login Modal */}
-      <LoginModal 
+      {/* Auth Modal */}
+      <AuthModal 
         isOpen={showLoginModal}
         onClose={() => setShowLoginModal(false)}
-        language={language}
       />
     </>
   )

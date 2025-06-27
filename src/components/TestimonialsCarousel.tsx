@@ -3,52 +3,54 @@
 import { useState, useEffect, useRef, useCallback } from "react"
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react"
 import { Button } from "@/components/ui/button"
-
-// 照片对比数据
-const photoComparisons = [
-  {
-    id: 1,
-    beforeImage: "/demo/1-0.jpg",
-    afterImage: "/demo/1-1.jpg",
-    title: "家庭老照片修复",
-    description: "30年代老照片重获新生",
-    testimonial: "没想到爷爷的老照片能修复得这么好，细节和色彩都很自然！"
-  },
-  {
-    id: 2,
-    beforeImage: "/demo/2-0.jpg",
-    afterImage: "/demo/2-1.jpg",
-    title: "人像照片修复",
-    description: "褪色人像照片完美复原",
-    testimonial: "AI技术真的很神奇，妈妈年轻时的照片又变得清晰鲜活了。"
-  },
-  {
-    id: 3,
-    beforeImage: "/demo/3-0.jpg",
-    afterImage: "/demo/3-1.jpg",
-    title: "历史照片修复",
-    description: "珍贵历史瞬间重现光彩",
-    testimonial: "这张珍贵的历史照片修复后效果超出预期，真的太棒了！"
-  },
-  {
-    id: 4,
-    beforeImage: "/demo/4-0.jpg",
-    afterImage: "/demo/4-1.jpg",
-    title: "风景照片修复",
-    description: "老风景照重现昔日风采",
-    testimonial: "童年时拍的风景照修复后色彩丰富，仿佛回到了那个美好的时光。"
-  },
-  {
-    id: 5,
-    beforeImage: "/demo/old_photo_bw.jpg",
-    afterImage: "/demo/old_photo_color.jpg",
-    title: "经典老照片修复",
-    description: "经典黑白照片完美上色",
-    testimonial: "这种经典的黑白照片修复效果真是令人惊艳，FLUX技术太强大了！"
-  }
-]
+import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function TestimonialsCarousel() {
+  const { t } = useLanguage()
+  
+  // 照片对比数据
+  const photoComparisons = [
+    {
+      id: 1,
+      beforeImage: "/demo/1-0.jpg",
+      afterImage: "/demo/1-1.jpg",
+      title: t('cases.case1.title'),
+      description: t('cases.case1.desc'),
+      testimonial: t('cases.case1.testimonial')
+    },
+    {
+      id: 2,
+      beforeImage: "/demo/2-0.jpg",
+      afterImage: "/demo/2-1.jpg",
+      title: t('cases.case2.title'),
+      description: t('cases.case2.desc'),
+      testimonial: t('cases.case2.testimonial')
+    },
+    {
+      id: 3,
+      beforeImage: "/demo/3-0.jpg",
+      afterImage: "/demo/3-1.jpg",
+      title: t('cases.case3.title'),
+      description: t('cases.case3.desc'),
+      testimonial: t('cases.case3.testimonial')
+    },
+    {
+      id: 4,
+      beforeImage: "/demo/4-0.jpg",
+      afterImage: "/demo/4-1.jpg",
+      title: t('cases.case4.title'),
+      description: t('cases.case4.desc'),
+      testimonial: t('cases.case4.testimonial')
+    },
+    {
+      id: 5,
+      beforeImage: "/demo/old_photo_bw.jpg",
+      afterImage: "/demo/old_photo_color.jpg",
+      title: t('cases.case5.title'),
+      description: t('cases.case5.desc'),
+      testimonial: t('cases.case5.testimonial')
+    }
+  ]
   const [isAutoPlaying, setIsAutoPlaying] = useState(true)
   const [isPaused, setIsPaused] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -139,10 +141,10 @@ export default function TestimonialsCarousel() {
         {/* 标题部分 */}
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-5xl font-bold mb-4">
-            真实用户 <span className="bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent">修复案例</span>
+            {t('cases.title')} <span className="bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent">{t('cases.titleHighlight')}</span>
           </h2>
           <p className="text-muted-foreground lg:text-xl max-w-3xl mx-auto">
-            看看其他用户使用我们的 <strong>FLUX AI</strong> 技术修复老照片的神奇效果
+            {t('cases.subtitle')}
           </p>
         </div>
       </div>
@@ -169,7 +171,7 @@ export default function TestimonialsCarousel() {
                     <div className="flex items-center justify-center gap-3">
                       <div className="h-px w-8 bg-muted-foreground/30"></div>
                       <h3 className="text-lg font-semibold text-muted-foreground flex items-center gap-2">
-                        📷 修复前
+                        {t('cases.before')}
                       </h3>
                       <div className="h-px w-8 bg-muted-foreground/30"></div>
                     </div>
@@ -183,7 +185,7 @@ export default function TestimonialsCarousel() {
                     </div>
                     <div className="text-center">
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
-                        黑白老照片
+                        {t('cases.beforeLabel')}
                       </span>
                     </div>
                   </div>
@@ -193,7 +195,7 @@ export default function TestimonialsCarousel() {
                     <div className="flex items-center justify-center gap-3">
                       <div className="h-px w-8 bg-primary/30"></div>
                       <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
-                        ✨ 修复后
+                        {t('cases.after')}
                       </h3>
                       <div className="h-px w-8 bg-primary/30"></div>
                     </div>
@@ -210,7 +212,7 @@ export default function TestimonialsCarousel() {
                     </div>
                     <div className="text-center">
                       <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                        AI 修复上色
+                        {t('cases.afterLabel')}
                       </span>
                     </div>
                   </div>
@@ -262,10 +264,10 @@ export default function TestimonialsCarousel() {
             size="sm"
             className="text-muted-foreground hover:text-foreground transition-colors"
           >
-            {isAutoPlaying ? "⏸️ 暂停自动滚动" : "▶️ 开启自动滚动"}
+            {isAutoPlaying ? t('cases.pauseAuto') : t('cases.startAuto')}
           </Button>
           <p className="text-xs text-muted-foreground text-center max-w-md">
-            悬停暂停滚动，使用左右箭头键快速浏览，空格键暂停/播放
+            {t('cases.controlTip')}
           </p>
         </div>
       </div>
