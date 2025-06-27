@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientBody from "./ClientBody";
 import { Toaster } from "@/components/ui/sonner";
+import AnimatedGridBackground from "@/components/AnimatedGridBackground";
 //-----test
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +28,7 @@ export default function RootLayout({
   return (
     <html lang="zh" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body suppressHydrationWarning className="antialiased">
+        <AnimatedGridBackground />
         <ClientBody>{children}</ClientBody>
         <Toaster />
       </body>
