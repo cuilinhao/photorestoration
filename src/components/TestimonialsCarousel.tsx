@@ -134,15 +134,15 @@ export default function TestimonialsCarousel() {
   const duplicatedComparisons = [...photoComparisons, ...photoComparisons]
 
   return (
-    <section className="py-8 bg-gradient-to-b from-purple-50 to-white overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-24 overflow-hidden">
+      <div className="container">
         {/* 标题部分 */}
-        <div className="text-center mb-8">
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-3">
-            真实用户修复效果
+        <div className="text-center mb-16">
+          <h2 className="text-3xl lg:text-5xl font-bold mb-4">
+            真实用户 <span className="bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent">修复案例</span>
           </h2>
-          <p className="text-base text-gray-600 max-w-2xl mx-auto">
-            看看其他用户使用我们的FLUX AI技术修复老照片的神奇效果
+          <p className="text-muted-foreground lg:text-xl max-w-3xl mx-auto">
+            看看其他用户使用我们的 <strong>FLUX AI</strong> 技术修复老照片的神奇效果
           </p>
         </div>
       </div>
@@ -161,19 +161,19 @@ export default function TestimonialsCarousel() {
               key={`${comparison.id}-${index}`}
               className="flex-none w-[90vw] sm:w-[80vw] md:w-[70vw] lg:w-[60vw] xl:w-[50vw] px-3"
             >
-              <div className="bg-white rounded-2xl shadow-xl p-4 md:p-6 lg:p-8 mx-auto h-full">
+              <div className="bg-card rounded-3xl border shadow-xl p-6 md:p-8 mx-auto h-full transition-all duration-300 hover:shadow-2xl">
                 {/* 照片对比展示 */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
                   {/* 修复前 */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="h-0.5 w-6 bg-gray-400 rounded"></div>
-                      <h3 className="text-lg font-semibold text-gray-700 flex items-center gap-1">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="h-px w-8 bg-muted-foreground/30"></div>
+                      <h3 className="text-lg font-semibold text-muted-foreground flex items-center gap-2">
                         📷 修复前
                       </h3>
-                      <div className="h-0.5 w-6 bg-gray-400 rounded"></div>
+                      <div className="h-px w-8 bg-muted-foreground/30"></div>
                     </div>
-                    <div className="aspect-[4/3] rounded-lg overflow-hidden shadow-lg border border-gray-200 group">
+                    <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border group">
                       <img
                         src={comparison.beforeImage}
                         alt="修复前"
@@ -181,46 +181,50 @@ export default function TestimonialsCarousel() {
                         draggable={false}
                       />
                     </div>
-                    <p className="text-center text-xs text-gray-500 bg-gray-50 px-3 py-1 rounded-full font-medium">
-                      黑白老照片
-                    </p>
+                    <div className="text-center">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-muted text-muted-foreground">
+                        黑白老照片
+                      </span>
+                    </div>
                   </div>
 
                   {/* 修复后 */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-center gap-2">
-                      <div className="h-0.5 w-6 bg-purple-400 rounded"></div>
-                      <h3 className="text-lg font-semibold text-purple-600 flex items-center gap-1">
+                  <div className="space-y-4 relative">
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="h-px w-8 bg-primary/30"></div>
+                      <h3 className="text-lg font-semibold text-primary flex items-center gap-2">
                         ✨ 修复后
                       </h3>
-                      <div className="h-0.5 w-6 bg-purple-400 rounded"></div>
+                      <div className="h-px w-8 bg-primary/30"></div>
                     </div>
-                    <div className="aspect-[4/3] rounded-lg overflow-hidden shadow-lg border border-purple-200 group">
+                    <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-primary/20 group relative">
                       <img
                         src={comparison.afterImage}
                         alt="修复后"
                         className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
                         draggable={false}
                       />
-                      <div className="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full text-xs font-semibold text-purple-600 opacity-80">
-                        FLUX
+                      <div className="absolute bottom-3 right-3 bg-primary/90 text-primary-foreground px-2 py-1 rounded-full text-xs font-semibold backdrop-blur-sm">
+                        FLUX AI
                       </div>
                     </div>
-                    <p className="text-center text-xs text-purple-600 font-semibold bg-gradient-to-r from-purple-50 to-purple-100 px-3 py-1 rounded-full">
-                      AI 修复上色
-                    </p>
+                    <div className="text-center">
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                        AI 修复上色
+                      </span>
+                    </div>
                   </div>
                 </div>
 
                 {/* 用户评价 */}
-                <div className="text-center space-y-3">
-                  <Quote className="w-6 h-6 text-purple-400 mx-auto" />
-                  <blockquote className="text-sm md:text-base text-gray-700 font-medium italic">
+                <div className="text-center space-y-4 mt-8">
+                  <Quote className="w-8 h-8 text-primary/60 mx-auto" />
+                  <blockquote className="text-sm md:text-base text-foreground font-medium italic leading-relaxed">
                     "{comparison.testimonial}"
                   </blockquote>
-                  <div className="space-y-1">
-                    <h4 className="font-semibold text-gray-900 text-sm">{comparison.title}</h4>
-                    <p className="text-gray-600 text-xs">{comparison.description}</p>
+                  <div className="space-y-2">
+                    <h4 className="font-semibold text-foreground">{comparison.title}</h4>
+                    <p className="text-muted-foreground text-sm">{comparison.description}</p>
                   </div>
                 </div>
               </div>
@@ -233,32 +237,34 @@ export default function TestimonialsCarousel() {
           onClick={() => handleManualScroll(-200)}
           variant="outline"
           size="icon"
-          className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg border-gray-200 hover:bg-white z-10"
+          className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/90 backdrop-blur-sm shadow-lg hover:bg-background z-10 transition-all duration-200 hover:scale-110"
         >
-          <ChevronLeft className="w-5 h-5" />
+          <ChevronLeft className="w-6 h-6" />
         </Button>
 
         <Button
           onClick={() => handleManualScroll(200)}
           variant="outline"
           size="icon"
-          className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg border-gray-200 hover:bg-white z-10"
+          className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-background/90 backdrop-blur-sm shadow-lg hover:bg-background z-10 transition-all duration-200 hover:scale-110"
         >
-          <ChevronRight className="w-5 h-5" />
+          <ChevronRight className="w-6 h-6" />
         </Button>
       </div>
 
       {/* 底部控制区域 */}
-      <div className="max-w-7xl mx-auto px-6 mt-6">
+      <div className="container mt-8">
         {/* 自动播放控制 */}
-        <div className="flex flex-col items-center space-y-1">
-          <button
+        <div className="flex flex-col items-center space-y-3">
+          <Button
             onClick={() => setIsAutoPlaying(!isAutoPlaying)}
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors font-medium"
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground transition-colors"
           >
             {isAutoPlaying ? "⏸️ 暂停自动滚动" : "▶️ 开启自动滚动"}
-          </button>
-          <p className="text-xs text-gray-400 text-center">
+          </Button>
+          <p className="text-xs text-muted-foreground text-center max-w-md">
             悬停暂停滚动，使用左右箭头键快速浏览，空格键暂停/播放
           </p>
         </div>
