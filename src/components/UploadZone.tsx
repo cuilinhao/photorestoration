@@ -26,24 +26,36 @@ export default function UploadZone() {
 
     // 检查登录状态
     if (!user) {
-      toast.error(t('upload.pleaseLogin'))
+      toast.error(t('upload.pleaseLogin'), {
+        position: 'top-center',
+        duration: 3000
+      })
       setShowLoginModal(true)
       return
     }
 
     // 检查使用次数
     if (!canUseService()) {
-      toast.error(t('upload.usageExhausted'))
+      toast.error(t('upload.usageExhausted'), {
+        position: 'top-center',
+        duration: 3000
+      })
       return
     }
 
     if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
-      toast.error(t('upload.invalidFormat'))
+      toast.error(t('upload.invalidFormat'), {
+        position: 'top-center',
+        duration: 3000
+      })
       return
     }
 
     if (file.size > 8 * 1024 * 1024) {
-      toast.error(t('upload.fileTooLarge'))
+      toast.error(t('upload.fileTooLarge'), {
+        position: 'top-center',
+        duration: 3000
+      })
       return
     }
 
@@ -66,9 +78,15 @@ export default function UploadZone() {
   const handleDownload = async () => {
     try {
       await downloadImage()
-      toast.success(t('common.downloadSuccess'))
+      toast.success(t('common.downloadSuccess'), {
+        position: 'top-center',
+        duration: 3000
+      })
     } catch (error) {
-      toast.error(t('common.downloadFailed'))
+      toast.error(t('common.downloadFailed'), {
+        position: 'top-center',
+        duration: 3000
+      })
     }
   }
 
@@ -80,7 +98,10 @@ export default function UploadZone() {
 
   // 错误处理
   if (error) {
-    toast.error(error)
+    toast.error(error, {
+      position: 'top-center',
+      duration: 4000
+    })
   }
 
   // 成功状态：显示对比结果
@@ -187,7 +208,7 @@ export default function UploadZone() {
                           {t('upload.loginRequired')}
                         </p>
                         <p className="text-muted-foreground">
-                          {t('upload.freeTrials')} <strong>3</strong> {t('upload.times')} AI 照片修复
+                          {t('upload.freeTrials')} <strong>1</strong> {t('upload.times')} AI 照片修复
                         </p>
                       </div>
                       <Button 
@@ -216,7 +237,10 @@ export default function UploadZone() {
                       <Button 
                         className="mx-auto"
                         onClick={() => {
-                          toast.success(t('common.upgradeComingSoon'))
+                          toast.success(t('common.upgradeComingSoon'), {
+                            position: 'top-center',
+                            duration: 3000
+                          })
                         }}
                       >
                         <Crown className="w-4 h-4 mr-2" />

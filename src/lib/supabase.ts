@@ -140,6 +140,7 @@ export async function signUpWithEmail(email: string, password: string, fullName?
     email,
     password,
     options: {
+      emailRedirectTo: undefined, // 禁用邮箱重定向
       data: {
         full_name: fullName
       }

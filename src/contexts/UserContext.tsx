@@ -44,7 +44,7 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
-const FREE_USAGE_LIMIT = 3
+const FREE_USAGE_LIMIT = 1
 
 // Helper function to convert profile to user format
 const profileToUser = (profile: Profile): User => ({
@@ -162,9 +162,24 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
       
       return false
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign up error:', error)
-      return false
+      
+      // Handle specific Supabase errors
+      if (error?.message?.includes('For security purposes')) {
+        throw new Error('操作频繁，请稍后再试')
+      } else if (error?.message?.includes('User already registered')) {
+        throw new Error('该邮箱已被注册')
+      } else if (error?.message?.includes('Invalid login credentials')) {
+        throw new Error('邮箱或密码错误')
+      } else if (error?.message?.includes('Password should be at least')) {
+        throw new Error('密码至少需蝑6位字符')
+      } else if (error?.message?.includes('Unable to validate email address')) {
+        throw new Error('邮箱格式不正确')
+      }
+      
+      // Default error message
+      throw new Error('注册失败，请稍后再试')
     }
   }
 
@@ -173,9 +188,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
     try {
       const { user: authUser } = await signInWithEmail(email, password)
       return !!authUser
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign in error:', error)
-      return false
+      
+      // Handle specific Supabase errors
+      if (error?.message?.includes('For security purposes')) {
+        throw new Error('操作频繁，请稍后再试')
+      } else if (error?.message?.includes('Invalid login credentials')) {
+        throw new Error('邮箱或密码错误')
+      } else if (error?.message?.includes('Email not confirmed')) {
+        throw new Error('请先验证邮箱')
+      } else if (error?.message?.includes('Too many requests')) {
+        throw new Error('请求过于频繁，请稍后再试')
+      }
+      
+      // Default error message
+      throw new Error('登录失败，请检查邮箱和密码')
     }
   }
 
@@ -184,8 +212,20 @@ export function UserProvider({ children }: { children: ReactNode }) {
     try {
       await supabaseSignOut()
       // State will be cleared via onAuthStateChange
-    } catch (error) {
+    } catch (error: any) {
       console.error('Sign out error:', error)
+      // 即使退出失败，也手动清理本地状态
+      setSupabaseUser(null)
+      setProfile(null)
+      setUser(null)
+      
+      // 如果是网络错误，不抛出异常
+      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+        console.log('网络错误，本地退出登录')
+        return
+      }
+      
+      throw error
     }
   }
 

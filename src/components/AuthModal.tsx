@@ -55,27 +55,58 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
       let success = false
       
       if (mode === 'signup') {
-        success = await signUp(email.trim(), password, fullName.trim())
-        if (success) {
-          toast.success(t('auth.signupSuccess'))
-          onClose()
-          resetForm()
-        } else {
-          toast.error(t('auth.signupFailed'))
+        console.log('开始注册用户:', { email: email.trim(), fullName: fullName.trim() })
+        try {
+          success = await signUp(email.trim(), password, fullName.trim())
+          if (success) {
+            console.log('用户注册成功:', email.trim())
+            toast.success(t('auth.signupSuccess'), {
+              position: 'top-center',
+              duration: 3000
+            })
+            onClose()
+            resetForm()
+          }
+        } catch (error: any) {
+          console.log('用户注册失败:', { email: email.trim(), error: error.message })
+          toast.error(error.message || t('auth.signupFailed'), {
+            position: 'top-center',
+            duration: 4000
+          })
+          return // Exit early on error
         }
       } else {
-        success = await signIn(email.trim(), password)
-        if (success) {
-          toast.success(t('auth.signinSuccess'))
-          onClose()
-          resetForm()
-        } else {
-          toast.error(t('auth.signinFailed'))
+        console.log('开始用户登录:', email.trim())
+        try {
+          success = await signIn(email.trim(), password)
+          if (success) {
+            console.log('用户登录成功:', email.trim())
+            toast.success(t('auth.signinSuccess'), {
+              position: 'top-center',
+              duration: 3000
+            })
+            onClose()
+            resetForm()
+          }
+        } catch (error: any) {
+          console.log('用户登录失败:', { email: email.trim(), error: error.message })
+          toast.error(error.message || t('auth.signinFailed'), {
+            position: 'top-center',
+            duration: 4000
+          })
+          return // Exit early on error
         }
       }
     } catch (error) {
-      console.error('Auth error:', error)
-      toast.error(mode === 'signup' ? t('auth.signupFailed') : t('auth.signinFailed'))
+      console.error(`${mode === 'signup' ? '注册' : '登录'}异常错误:`, {
+        email: email.trim(),
+        error: error instanceof Error ? error.message : error,
+        stack: error instanceof Error ? error.stack : undefined
+      })
+      toast.error(mode === 'signup' ? t('auth.signupFailed') : t('auth.signinFailed'), {
+        position: 'top-center',
+        duration: 4000
+      })
     } finally {
       setIsLoading(false)
     }
@@ -259,7 +290,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
                 size="sm" 
                 className="w-full"
                 onClick={() => {
-                  toast.success(t('common.upgradeComingSoon'))
+                  toast.success(t('common.upgradeComingSoon'), {
+                    position: 'top-center',
+                    duration: 3000
+                  })
                 }}
                 disabled={isLoading}
               >
