@@ -193,7 +193,14 @@ export default function LoginModal({ isOpen, onClose, language = 'zh' }: LoginMo
                   {t.premiumFeature3}
                 </li>
               </ul>
-              <Button variant="outline" size="sm" className="w-full">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="w-full"
+                onClick={() => {
+                  toast.success(language === 'zh' ? '升级功能开发中，敬请期待！' : 'Upgrade feature coming soon!')
+                }}
+              >
                 <Crown className="h-4 w-4 mr-2" />
                 {t.upgradeButton}
               </Button>

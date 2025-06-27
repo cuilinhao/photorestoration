@@ -21,7 +21,7 @@ export async function GET(
     const response = await fetch(`${REPLICATE_API_BASE}/predictions/${id}`, {
       method: 'GET',
       headers: {
-        'Authorization': `Bearer ${token}`,
+        'Authorization': `Token ${token}`,
         'Content-Type': 'application/json'
       }
     })

@@ -4,6 +4,7 @@ import "./globals.css";
 import ClientBody from "./ClientBody";
 import { Toaster } from "@/components/ui/sonner";
 import { UserProvider } from "@/contexts/UserContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 //-----test
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,10 +29,12 @@ export default function RootLayout({
   return (
     <html lang="zh" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body suppressHydrationWarning className="antialiased">
-        <UserProvider>
-          <ClientBody>{children}</ClientBody>
-          <Toaster />
-        </UserProvider>
+        <LanguageProvider>
+          <UserProvider>
+            <ClientBody>{children}</ClientBody>
+            <Toaster />
+          </UserProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

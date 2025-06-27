@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { Download, RotateCcw } from "lucide-react"
 import { useState } from "react"
 import ReactCompareImage from "react-compare-image"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 interface ResultComparisonProps {
   originalImage: string
@@ -19,6 +20,7 @@ export default function ResultComparison({
   onTryAgain
 }: ResultComparisonProps) {
   const [viewMode, setViewMode] = useState<'side-by-side' | 'slider'>('side-by-side')
+  const { t } = useLanguage()
 
   return (
     <div className="w-full max-w-6xl mx-auto space-y-6">
@@ -33,7 +35,7 @@ export default function ResultComparison({
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            并排对比
+            {t('result.sideBySide')}
           </button>
           <button
             onClick={() => setViewMode('slider')}
@@ -43,7 +45,7 @@ export default function ResultComparison({
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            滑块对比
+            {t('result.slider')}
           </button>
         </div>
       </div>
@@ -58,7 +60,7 @@ export default function ResultComparison({
               <div className="flex items-center justify-center gap-2">
                 <div className="h-1 w-8 bg-gray-400 rounded"></div>
                 <h3 className="text-lg font-semibold text-gray-700">
-                  📷 原始照片
+                  {t('result.original')}
                 </h3>
                 <div className="h-1 w-8 bg-gray-400 rounded"></div>
               </div>
@@ -71,7 +73,7 @@ export default function ResultComparison({
               </div>
               <div className="text-center">
                 <p className="text-sm text-gray-600 bg-gray-50 px-3 py-1 rounded-full inline-block">
-                  黑白老照片
+                  {t('result.blackWhite')}
                 </p>
               </div>
             </div>
@@ -81,7 +83,7 @@ export default function ResultComparison({
               <div className="flex items-center justify-center gap-2">
                 <div className="h-1 w-8 bg-purple-400 rounded"></div>
                 <h3 className="text-lg font-semibold text-purple-600">
-                  ✨ AI 上色结果
+                  {t('result.aiResult')}
                 </h3>
                 <div className="h-1 w-8 bg-purple-400 rounded"></div>
               </div>
@@ -94,7 +96,7 @@ export default function ResultComparison({
               </div>
               <div className="text-center">
                 <p className="text-sm text-purple-600 font-medium bg-purple-50 px-3 py-1 rounded-full inline-block">
-                  彩色复原照片
+                  {t('result.colorRestored')}
                 </p>
               </div>
             </div>
@@ -105,7 +107,7 @@ export default function ResultComparison({
             {/* 原图 */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-center text-gray-700">
-                📷 原始照片
+                {t('result.original')}
               </h3>
               <div className="aspect-[4/3] w-full rounded-xl overflow-hidden shadow-xl border-2 border-gray-200">
                 <img
@@ -115,7 +117,7 @@ export default function ResultComparison({
                 />
               </div>
               <p className="text-sm text-center text-gray-600 bg-gray-50 px-3 py-1 rounded-full inline-block mx-auto">
-                黑白老照片
+                {t('result.blackWhite')}
               </p>
             </div>
 
@@ -129,7 +131,7 @@ export default function ResultComparison({
             {/* 上色图 */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-center text-purple-600">
-                ✨ AI 上色结果
+                {t('result.aiResult')}
               </h3>
               <div className="aspect-[4/3] w-full rounded-xl overflow-hidden shadow-xl border-2 border-purple-200">
                 <img
@@ -139,7 +141,7 @@ export default function ResultComparison({
                 />
               </div>
               <p className="text-sm text-center text-purple-600 font-medium bg-purple-50 px-3 py-1 rounded-full inline-block mx-auto">
-                彩色复原照片
+                {t('result.colorRestored')}
               </p>
             </div>
           </div>
@@ -156,12 +158,21 @@ export default function ResultComparison({
               sliderLineColor="#7C3AED"
               sliderLineWidth={4}
               handle={
-                <div className="w-8 h-8 rounded-full bg-purple-600 border-4 border-white shadow-lg" />
+                <div 
+                  style={{
+                    width: '32px',
+                    height: '32px',
+                    backgroundColor: '#7C3AED',
+                    border: '4px solid white',
+                    borderRadius: '50%',
+                    boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
+                  }}
+                />
               }
             />
           </div>
           <p className="text-sm text-center text-gray-500">
-            拖动滑块查看前后对比效果
+            {t('result.dragSlider')}
           </p>
         </div>
       )}
@@ -173,7 +184,7 @@ export default function ResultComparison({
           className="h-12 px-8 text-lg rounded-xl bg-purple-600 text-white hover:bg-purple-700 flex items-center gap-2"
         >
           <Download size={20} />
-          下载彩色照片
+          {t('result.download')}
         </Button>
 
         <Button
@@ -182,33 +193,33 @@ export default function ResultComparison({
           className="h-12 px-8 text-lg rounded-xl border-purple-600 text-purple-600 hover:bg-purple-50 flex items-center gap-2"
         >
           <RotateCcw size={20} />
-          上传新照片
+          {t('result.tryAgain')}
         </Button>
       </div>
 
       {/* 结果信息 */}
       <div className="text-center space-y-2 pt-4 border-t">
         <p className="text-xl font-semibold text-gray-900">
-          🎉 AI 修复与上色完成！
+          {t('result.completed')}
         </p>
         <p className="text-gray-600 max-w-2xl mx-auto">
           {viewMode === 'side-by-side' 
-            ? '左右对比查看修复与上色效果，可以清楚看到照片的品质提升和色彩变化。FLUX 技术智能修复损坏并还原自然色彩。'
-            : '拖动滑块查看前后对比效果，体验 FLUX AI 修复与上色技术的神奇魅力。'
+            ? t('result.sideBySeideDesc')
+            : t('result.sliderDesc')
           }
         </p>
         <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-gray-500 pt-3">
                      <div className="flex items-center gap-1">
              <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-             <span>智能修复</span>
+             <span>{t('result.smartRestore')}</span>
            </div>
            <div className="flex items-center gap-1">
              <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-             <span>高清上色</span>
+             <span>{t('result.hdColor')}</span>
            </div>
            <div className="flex items-center gap-1">
              <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-             <span>FLUX 驱动</span>
+             <span>{t('result.fluxPowered')}</span>
            </div>
         </div>
       </div>

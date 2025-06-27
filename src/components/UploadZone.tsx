@@ -11,12 +11,13 @@ import ProgressBar from "./ProgressBar"
 import LoginModal from "./LoginModal"
 import { useImageRestore } from "@/hooks/useImageRestore"
 import { useUser } from "@/contexts/UserContext"
+import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function UploadZone() {
   const { status, originalImage, restoredImage, progress, error, processImage, reset, downloadImage } = useImageRestore()
   const { user, canUseService, incrementUsage, getRemainingUses } = useUser()
+  const { language, t } = useLanguage()
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const [language] = useState<'zh' | 'en'>('zh')
 
   // 文件验证和处理
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -25,31 +26,31 @@ export default function UploadZone() {
 
     // 检查登录状态
     if (!user) {
-      toast.error('请先登录后使用服务')
+      toast.error(t('upload.pleaseLogin'))
       setShowLoginModal(true)
       return
     }
 
     // 检查使用次数
     if (!canUseService()) {
-      toast.error('您的免费使用次数已用完，请升级到付费版')
+      toast.error(t('upload.usageExhausted'))
       return
     }
 
     if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
-      toast.error('请上传 JPG 或 PNG 格式的图片')
+      toast.error(t('upload.invalidFormat'))
       return
     }
 
     if (file.size > 8 * 1024 * 1024) {
-      toast.error('图片大小不能超过 8MB')
+      toast.error(t('upload.fileTooLarge'))
       return
     }
 
     // 增加使用次数
     incrementUsage()
     processImage(file)
-  }, [processImage, user, canUseService, incrementUsage])
+  }, [processImage, user, canUseService, incrementUsage, t])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -65,9 +66,9 @@ export default function UploadZone() {
   const handleDownload = async () => {
     try {
       await downloadImage()
-      toast.success('图片下载成功！')
+      toast.success(t('common.downloadSuccess'))
     } catch (error) {
-      toast.error('下载失败，请重试')
+      toast.error(t('common.downloadFailed'))
     }
   }
 
@@ -106,10 +107,10 @@ export default function UploadZone() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-5xl font-bold mb-4">
-              开始 <span className="bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent">AI 修复</span>
+              {t('upload.title')} <span className="bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent">{t('upload.aiRestore')}</span>
             </h2>
             <p className="text-muted-foreground lg:text-xl">
-              支持 <strong>JPG、PNG</strong> 格式，最大 8MB
+              {t('upload.subtitle')}
             </p>
           </div>
 
@@ -136,8 +137,8 @@ export default function UploadZone() {
                     <Loader size={64} />
                   </div>
                   <div className="space-y-2">
-                    <p className="text-xl font-semibold text-primary">上传中...</p>
-                    <p className="text-muted-foreground">正在上传您的照片</p>
+                    <p className="text-xl font-semibold text-primary">{t('upload.uploading')}</p>
+                    <p className="text-muted-foreground">{t('upload.uploadingDesc')}</p>
                   </div>
                 </>
               )}
@@ -150,9 +151,9 @@ export default function UploadZone() {
                   </div>
                   <ProgressBar percent={progress} className="mb-6" />
                   <div className="space-y-2">
-                    <p className="text-xl font-semibold text-primary">AI 修复与上色中...</p>
+                    <p className="text-xl font-semibold text-primary">{t('upload.processing')}</p>
                     <p className="text-muted-foreground">
-                      {progress > 0 ? `正在处理第 ${progress}% 步骤` : '正在初始化 FLUX 模型...'}
+                      {progress > 0 ? `${t('upload.processingDesc')} ${progress}% ${t('common.step')}` : t('upload.processingInit')}
                     </p>
                   </div>
                 </>
@@ -167,10 +168,10 @@ export default function UploadZone() {
                     </div>
                     <div className="space-y-2">
                       <p className="text-xl font-semibold text-primary">
-                        松开鼠标上传照片
+                        {t('upload.dropHere')}
                       </p>
                       <p className="text-muted-foreground">
-                        准备开始 AI 修复之旅
+                        {t('upload.ready')}
                       </p>
                     </div>
                   </>
@@ -183,17 +184,17 @@ export default function UploadZone() {
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <p className="text-xl font-semibold text-foreground">
-                          请先登录使用 AI 修复服务
+                          {t('upload.loginRequired')}
                         </p>
                         <p className="text-muted-foreground">
-                          登录后可免费使用 <strong>3次</strong> AI 照片修复
+                          {t('upload.freeTrials')} <strong>3</strong> {t('upload.times')} AI 照片修复
                         </p>
                       </div>
                       <Button 
                         onClick={() => setShowLoginModal(true)}
                         className="mx-auto"
                       >
-                        立即登录
+                        {t('upload.login')}
                       </Button>
                     </div>
                   </>
@@ -206,15 +207,20 @@ export default function UploadZone() {
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <p className="text-xl font-semibold text-foreground">
-                          免费使用次数已用完
+                          {t('upload.usageLimit')}
                         </p>
                         <p className="text-muted-foreground">
-                          升级到付费版享受 <strong>无限次数</strong> 修复和优先处理
+                          {t('upload.upgrade')} <strong>{t('upload.unlimited')}</strong> 修复和优先处理
                         </p>
                       </div>
-                      <Button className="mx-auto">
+                      <Button 
+                        className="mx-auto"
+                        onClick={() => {
+                          toast.success(t('common.upgradeComingSoon'))
+                        }}
+                      >
                         <Crown className="w-4 h-4 mr-2" />
-                        升级到付费版
+                        {t('upload.upgradeBtn')}
                       </Button>
                     </div>
                   </>
@@ -227,26 +233,26 @@ export default function UploadZone() {
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <p className="text-xl font-semibold text-foreground">
-                          拖拽照片到这里，或点击选择文件
+                          {t('upload.dragDrop')}
                         </p>
                         <p className="text-muted-foreground">
-                          支持 <strong>JPG、PNG</strong> 格式，最大 <strong>8MB</strong>
+                          {t('upload.supportFormat')} <strong>JPG、PNG</strong> {t('upload.maxSize')} <strong>8MB</strong>
                         </p>
                         {user && (
                           <p className="text-sm text-primary font-medium">
-                            剩余使用次数: {getRemainingUses() === -1 ? '无限制' : `${getRemainingUses()}次`}
+                            {t('upload.remainingUses')} {getRemainingUses() === -1 ? t('header.unlimited') : `${getRemainingUses()}${t('upload.times')}`}
                           </p>
                         )}
                       </div>
                       <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                          ⚡ 60秒快速处理
+                          {t('upload.fastProcess')}
                         </span>
                         <span className="flex items-center gap-1">
-                          🎨 AI 智能上色
+                          {t('upload.aiColor')}
                         </span>
                         <span className="flex items-center gap-1">
-                          📱 2K 高清输出
+                          {t('upload.hdOutput')}
                         </span>
                       </div>
                     </div>
@@ -261,8 +267,8 @@ export default function UploadZone() {
                     <span className="text-3xl">❌</span>
                   </div>
                   <div className="space-y-2">
-                    <p className="text-xl font-semibold text-destructive">处理失败</p>
-                    <p className="text-muted-foreground">请检查图片格式并重试</p>
+                    <p className="text-xl font-semibold text-destructive">{t('upload.error')}</p>
+                    <p className="text-muted-foreground">{t('upload.errorDesc')}</p>
                   </div>
                 </>
               )}

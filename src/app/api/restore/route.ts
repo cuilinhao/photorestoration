@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     const response = await fetch(`${REPLICATE_API_BASE}/predictions`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${REPLICATE_API_TOKEN}`,
+        'Authorization': `Token ${REPLICATE_API_TOKEN}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({

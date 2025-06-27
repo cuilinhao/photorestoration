@@ -5,13 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Menu, Moon, Sun, Globe, LogIn, User, LogOut } from "lucide-react"
 import { useUser } from "@/contexts/UserContext"
+import { useLanguage } from "@/contexts/LanguageContext"
 import LoginModal from "@/components/LoginModal"
 
 export default function Header() {
   const [isDark, setIsDark] = useState(false)
-  const [language, setLanguage] = useState<'zh' | 'en'>('zh')
   const [showLoginModal, setShowLoginModal] = useState(false)
   const { user, logout, getRemainingUses } = useUser()
+  const { language, setLanguage, t } = useLanguage()
   const isLoggedIn = !!user
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
@@ -33,10 +34,10 @@ export default function Header() {
   }
 
   const navItems = [
-    { id: 'features', label: language === 'zh' ? '功能特色' : 'Features' },
-    { id: 'cases', label: language === 'zh' ? '案例展示' : 'Showcase' },
-    { id: 'uploader', label: language === 'zh' ? '开始使用' : 'Get Started' },
-    { id: 'faq', label: language === 'zh' ? '常见问题' : 'FAQ' },
+    { id: 'features', label: t('nav.features') },
+    { id: 'cases', label: t('nav.showcase') },
+    { id: 'uploader', label: t('nav.getStarted') },
+    { id: 'faq', label: t('nav.faq') },
   ]
 
   return (
@@ -96,8 +97,8 @@ export default function Header() {
             <div className="hidden sm:flex items-center space-x-2">
               <div className="text-xs text-muted-foreground">
                 {getRemainingUses() === -1 
-                  ? (language === 'zh' ? '无限制' : 'Unlimited')
-                  : `${getRemainingUses()}/${language === 'zh' ? '次' : ' left'}`
+                  ? t('header.unlimited')
+                  : `${getRemainingUses()}/${t('header.timesLeft')}`
                 }
               </div>
               <Button variant="ghost" size="icon" onClick={logout}>
@@ -112,7 +113,7 @@ export default function Header() {
               onClick={() => setShowLoginModal(true)}
             >
               <LogIn className="h-4 w-4 mr-2" />
-              {language === 'zh' ? '登录' : 'Sign In'}
+              {t('header.signIn')}
             </Button>
           )}
 
@@ -151,7 +152,7 @@ export default function Header() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">
-                  {language === 'zh' ? '深色模式' : 'Dark Mode'}
+                  {t('header.darkMode')}
                 </span>
                 <Button
                   variant="ghost"
@@ -164,14 +165,14 @@ export default function Header() {
 
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">
-                  {language === 'zh' ? '语言' : 'Language'}
+                  {t('header.language')}
                 </span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={toggleLanguage}
                 >
-                  {language === 'zh' ? '中文' : 'English'}
+                  {t('header.chinese')}
                 </Button>
               </div>
 
@@ -179,12 +180,12 @@ export default function Header() {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">
-                      {language === 'zh' ? '使用次数' : 'Usage'}
+                      {t('header.usage')}
                     </span>
                     <span className="text-sm text-muted-foreground">
                       {getRemainingUses() === -1 
-                        ? (language === 'zh' ? '无限制' : 'Unlimited')
-                        : `${getRemainingUses()}/${language === 'zh' ? '次' : ' left'}`
+                        ? t('header.unlimited')
+                        : `${getRemainingUses()}/${t('header.timesLeft')}`
                       }
                     </span>
                   </div>
@@ -195,7 +196,7 @@ export default function Header() {
                     onClick={logout}
                   >
                     <LogOut className="h-4 w-4 mr-2" />
-                    {language === 'zh' ? '登出' : 'Sign Out'}
+                    {t('header.signOut')}
                   </Button>
                 </div>
               ) : (
@@ -205,7 +206,7 @@ export default function Header() {
                   onClick={() => setShowLoginModal(true)}
                 >
                   <LogIn className="h-4 w-4 mr-2" />
-                  {language === 'zh' ? '登录' : 'Sign In'}
+                  {t('header.signIn')}
                 </Button>
               )}
             </div>
