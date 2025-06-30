@@ -243,7 +243,7 @@ export default function UploadZone() {
                           {t('upload.dragAndDrop')}
                         </p>
                         <p className="text-muted-foreground">
-                          游客模式每日可免费体验 <strong>2</strong> 次 AI 照片上色
+                          游客模式每日可免费体验 <strong>10</strong> 次，登录后可使用 <strong>20</strong> 次
                         </p>
                       </div>
                       <Button 
@@ -252,7 +252,7 @@ export default function UploadZone() {
                         className="mx-auto"
                       >
                         <Crown className="w-4 h-4 mr-2" />
-                        登录获得更多次数
+                        登录获得 20 次使用权限
                       </Button>
                     </div>
                   </>

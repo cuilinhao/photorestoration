@@ -4,6 +4,7 @@ import { useState } from "react"
 import { uploadToStorage } from "@/lib/supabase"
 import { createPrediction, getPrediction } from "@/lib/replicate"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default function QuickTest() {
   const [status, setStatus] = useState('')
@@ -117,7 +118,13 @@ ${predictionStatus.logs ? '📋 日志: ' + predictionStatus.logs.substring(0, 1
       
       <div className="mt-8 p-4 bg-green-50 rounded-lg">
         <h3 className="font-semibold text-green-800 mb-2">接下来测试主功能:</h3>
-        <p className="text-green-700">如果这里的测试都通过了，访问 <a href="/" className="underline font-medium">首页</a> 测试完整的上传流程。</p>
+        <p className="text-green-700">如果这里的测试都通过了，访问 <Link href="/" className="underline font-medium">首页</Link> 测试完整的上传流程。</p>
+      </div>
+      
+      <div className="mt-4 p-3 bg-blue-100 rounded">
+        <p className="text-blue-800 font-medium">
+          🎯 现在你可以回到主页 <Link href="/" className="underline">http://localhost:3001</Link> 测试任何图片上传了！
+        </p>
       </div>
     </div>
   )

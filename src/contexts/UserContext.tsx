@@ -44,7 +44,8 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
-const FREE_USAGE_LIMIT = 20
+const GUEST_USAGE_LIMIT = 10  // 未登录用户限制
+const LOGGED_IN_USAGE_LIMIT = 20  // 登录用户限制
 
 // Helper function to convert profile to user format
 const profileToUser = (profile: Profile): User => ({
@@ -261,32 +262,70 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // Check if user can use service
   const canUseService = (): boolean => {
-    if (!user) return false
-    if (user.isPremium) return true
-    
-    // Check monthly usage
-    const today = new Date()
-    const lastUsage = new Date(user.lastUsageDate)
-    
-    // If different month, reset usage
-    if (today.getMonth() !== lastUsage.getMonth() || today.getFullYear() !== lastUsage.getFullYear()) {
+    if (!user) {
+      // 未登录用户的限制检查
+      const guestUsage = localStorage.getItem('guest_usage')
+      if (guestUsage) {
+        const usage = JSON.parse(guestUsage)
+        const today = new Date().toISOString().split('T')[0]
+        
+        // 如果是新的一天，重置次数
+        if (usage.lastUsageDate.split('T')[0] !== today) {
+          return true
+        }
+        
+        return usage.count < GUEST_USAGE_LIMIT
+      }
       return true
     }
     
-    return user.usageCount < FREE_USAGE_LIMIT
+    if (user.isPremium) return true
+    
+    // Check daily usage for logged in users
+    const today = new Date()
+    const lastUsage = new Date(user.lastUsageDate)
+    
+    // If different day, reset usage
+    if (today.toDateString() !== lastUsage.toDateString()) {
+      return true
+    }
+    
+    return user.usageCount < LOGGED_IN_USAGE_LIMIT
   }
 
   // Increment usage count
   const incrementUsage = async (): Promise<void> => {
-    if (!user || !supabaseUser) return
+    if (!user) {
+      // 未登录用户，在localStorage中记录使用次数
+      const guestUsage = localStorage.getItem('guest_usage')
+      let usage = { count: 0, lastUsageDate: new Date().toISOString() }
+      
+      if (guestUsage) {
+        usage = JSON.parse(guestUsage)
+      }
+      
+      // 检查是否是新的一天
+      const today = new Date().toISOString().split('T')[0]
+      if (usage.lastUsageDate.split('T')[0] !== today) {
+        usage.count = 1
+      } else {
+        usage.count += 1
+      }
+      
+      usage.lastUsageDate = new Date().toISOString()
+      localStorage.setItem('guest_usage', JSON.stringify(usage))
+      return
+    }
+
+    if (!supabaseUser || user.isPremium) return
 
     const today = new Date()
     const lastUsage = new Date(user.lastUsageDate)
     
     let newUsageCount = user.usageCount
 
-    // If different month, reset usage
-    if (today.getMonth() !== lastUsage.getMonth() || today.getFullYear() !== lastUsage.getFullYear()) {
+    // If different day, reset usage
+    if (today.toDateString() !== lastUsage.toDateString()) {
       newUsageCount = 1
     } else {
       newUsageCount += 1
@@ -309,18 +348,34 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // Get remaining uses
   const getRemainingUses = (): number => {
-    if (!user) return 0
+    if (!user) {
+      // 未登录用户剩余次数
+      const guestUsage = localStorage.getItem('guest_usage')
+      if (guestUsage) {
+        const usage = JSON.parse(guestUsage)
+        const today = new Date().toISOString().split('T')[0]
+        
+        // 如果是新的一天，返回全部次数
+        if (usage.lastUsageDate.split('T')[0] !== today) {
+          return GUEST_USAGE_LIMIT
+        }
+        
+        return Math.max(0, GUEST_USAGE_LIMIT - usage.count)
+      }
+      return GUEST_USAGE_LIMIT
+    }
+    
     if (user.isPremium) return -1 // -1 means unlimited
 
     const today = new Date()
     const lastUsage = new Date(user.lastUsageDate)
     
-    // If different month, reset usage
-    if (today.getMonth() !== lastUsage.getMonth() || today.getFullYear() !== lastUsage.getFullYear()) {
-      return FREE_USAGE_LIMIT
+    // If different day, reset usage
+    if (today.toDateString() !== lastUsage.toDateString()) {
+      return LOGGED_IN_USAGE_LIMIT
     }
     
-    return Math.max(0, FREE_USAGE_LIMIT - user.usageCount)
+    return Math.max(0, LOGGED_IN_USAGE_LIMIT - user.usageCount)
   }
 
   const value: UserContextType = {

@@ -1,11 +1,14 @@
 "use client"
 
+import { useLanguage } from "@/contexts/LanguageContext"
+
 interface ProgressBarProps {
   percent: number;
   className?: string;
 }
 
 export default function ProgressBar({ percent, className = "" }: ProgressBarProps) {
+  const { t } = useLanguage()
   return (
     <div className={`w-full max-w-md mx-auto ${className}`}>
       {/* 百分比显示 */}
@@ -30,7 +33,7 @@ export default function ProgressBar({ percent, className = "" }: ProgressBarProp
       {/* 进度描述 */}
       <div className="text-center mt-2">
         <span className="text-sm text-gray-600">
-          AI 正在修复并为您的照片上色...
+          {t('upload.processing')}
         </span>
       </div>
     </div>
