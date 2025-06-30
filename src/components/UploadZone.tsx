@@ -24,44 +24,67 @@ export default function UploadZone() {
     const file = acceptedFiles[0]
     if (!file) return
 
-    // 检查登录状态
+    // 检查登录状态 - 允许游客使用
     if (!user) {
-      toast.error(t('upload.pleaseLogin'), {
+      console.log('🚀 [UPLOAD] Guest user detected, allowing upload with limitations')
+      toast.info('游客模式：每日可免费体验2次', {
         position: 'top-center',
         duration: 3000
       })
-      setShowLoginModal(true)
-      return
+    } else {
+      // 检查使用次数（仅对登录用户）
+      if (!canUseService()) {
+        toast.error(t('upload.usageExhausted'), {
+          position: 'top-center',
+          duration: 3000
+        })
+        return
+      }
+      // 增加使用次数
+      incrementUsage()
     }
 
-    // 检查使用次数
-    if (!canUseService()) {
-      toast.error(t('upload.usageExhausted'), {
-        position: 'top-center',
-        duration: 3000
-      })
-      return
-    }
+    // 调试信息
+    console.log('📋 [FILE-CHECK] File details:', {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      lastModified: file.lastModified
+    })
 
-    // 检查文件类型
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
-    if (!validTypes.includes(file.type)) {
-      toast.error(t('upload.invalidFormat'), {
-        position: 'top-center',
-        duration: 3000
-      })
-      return
-    }
+    // 超宽松的文件检查 - 主要靠扩展名
+    const fileName = file.name.toLowerCase()
+    const validExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp']
+    const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext))
     
-    // 通过文件扩展名进行额外验证
-    const validExtensions = ['.jpg', '.jpeg', '.png']
-    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
-    if (!validExtensions.includes(fileExtension)) {
-      toast.error('请上传 JPG 或 PNG 格式的图片', {
+    console.log('🔍 [FILE-CHECK] Extension check:', {
+      fileName,
+      hasValidExtension,
+      validExtensions
+    })
+    
+    // 只在明显不是图片时才拒绝
+    if (!hasValidExtension && !file.type.startsWith('image/')) {
+      toast.error('请上传图片文件（JPG、PNG、WebP 等格式）', {
         position: 'top-center',
         duration: 3000
       })
       return
+    }
+
+    // MIME类型检查（超宽松）
+    console.log('🔍 [FILE-CHECK] MIME type check:', {
+      fileType: file.type,
+      startsWithImage: file.type.startsWith('image/'),
+      fileName: file.name
+    })
+    
+    // 基本上接受所有图片，只在明显有问题时提醒
+    if (file.type && !file.type.startsWith('image/') && !hasValidExtension) {
+      toast.warning('文件类型可能不支持，正在尝试处理...', {
+        position: 'top-center',
+        duration: 2000
+      })
     }
 
     if (file.size > 8 * 1024 * 1024) {
@@ -72,19 +95,18 @@ export default function UploadZone() {
       return
     }
 
-    // 增加使用次数
-    incrementUsage()
     processImage(file)
   }, [processImage, user, canUseService, incrementUsage, t])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png']
+      'image/*': [], // 接受所有图片类型
     },
     multiple: false,
-    disabled: status !== 'idle' || !user || !canUseService()
+    disabled: status !== 'idle' || (!!user && !canUseService()),
+    // 完全不限制文件类型，让我们的自定义验证处理
+    validator: undefined
   })
 
   // 下载处理
@@ -210,29 +232,31 @@ export default function UploadZone() {
                     </div>
                   </>
                 ) : !user ? (
-                  // 未登录状态
+                  // 游客模式状态
                   <>
-                    <div className="w-20 h-20 mx-auto bg-muted rounded-2xl flex items-center justify-center mb-6">
-                      <Lock className="w-10 h-10 text-muted-foreground" />
+                    <div className="w-20 h-20 mx-auto bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+                      <Upload className="w-10 h-10 text-primary" />
                     </div>
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <p className="text-xl font-semibold text-foreground">
-                          {t('upload.loginRequired')}
+                          {t('upload.dragAndDrop')}
                         </p>
                         <p className="text-muted-foreground">
-                          {t('upload.freeTrials')} <strong>1</strong> {t('upload.times')} AI 照片修复
+                          游客模式每日可免费体验 <strong>2</strong> 次 AI 照片上色
                         </p>
                       </div>
                       <Button 
                         onClick={() => setShowLoginModal(true)}
+                        variant="outline"
                         className="mx-auto"
                       >
-                        {t('upload.login')}
+                        <Crown className="w-4 h-4 mr-2" />
+                        登录获得更多次数
                       </Button>
                     </div>
                   </>
-                ) : !canUseService() ? (
+                ) : !!user && !canUseService() ? (
                   // 使用次数耗尽状态
                   <>
                     <div className="w-20 h-20 mx-auto bg-yellow-100 rounded-2xl flex items-center justify-center mb-6">

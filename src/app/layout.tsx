@@ -5,7 +5,7 @@ import ClientBody from "./ClientBody";
 import { Toaster } from "@/components/ui/sonner";
 import { UserProvider } from "@/contexts/UserContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-//-----test
+
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

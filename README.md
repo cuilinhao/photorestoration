@@ -26,7 +26,7 @@
 - **sonner** - 优雅的消息提示
 - **lucide-react** - 现代图标库
 
-### AI 服务（计划中）
+### AI 服务
 - **Replicate API** - AI 图像处理服务
 - **Supabase Storage** - 云端图片存储
 
@@ -69,8 +69,8 @@ photo-restoration/
 │   │   ├── Loader.tsx         # 加载动画组件
 │   │   └── ui/                # 基础 UI 组件
 │   └── lib/                   # 工具函数
-│       ├── replicate.ts       # AI 服务接口（Mock）
-│       ├── supabase.ts        # 存储服务接口（Mock）
+│       ├── replicate.ts       # AI 服务接口
+│       ├── supabase.ts        # 存储服务接口  
 │       └── utils.ts           # 通用工具函数
 ├── public/
 │   └── demo/                  # 演示图片
@@ -105,24 +105,45 @@ npm run format    # 代码格式化
 
 ## 🔧 配置说明
 
-### 环境变量（待配置）
+### 环境变量配置
+
+创建 `.env.local` 文件并配置以下变量：
+
 ```env
 # Replicate API（AI 服务）
-REPLICATE_API_TOKEN=your_replicate_token
+REPLICATE_API_TOKEN=r8_your_replicate_api_token_here
+REPLICATE_RESTORE_VERSION=85ae46551612b8f778348846b6ce1ce1b340e384fe2062399c0c412be29e107d
 
 # Supabase（存储服务）
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+SUPABASE_STORAGE_BUCKET=photo-restoration-images
+
+# 可选：只读token用于状态查询
+NEXT_PUBLIC_REPLICATE_READ_TOKEN=r8_your_replicate_read_token_here
 ```
+
+#### 获取API密钥
+
+1. **Replicate API**:
+   - 访问 [replicate.com](https://replicate.com)
+   - 注册账号并获取API Token
+   - 复制token到 `REPLICATE_API_TOKEN`
+
+2. **Supabase**:
+   - 访问 [supabase.com](https://supabase.com)
+   - 创建新项目
+   - 在项目设置中找到API密钥
+   - 复制URL和anon key
 
 ### 当前状态
 - ✅ **前端 UI** - 完整实现
 - ✅ **响应式设计** - 完美适配
 - ✅ **文件上传** - 支持验证和预览
 - ✅ **结果展示** - 滑块对比功能
-- 🚧 **AI 服务** - 使用 Mock 数据
-- 🚧 **云存储** - 使用本地 Blob URL
-- 🚧 **生产部署** - 待配置真实服务
+- ✅ **AI 服务** - 集成 Replicate API
+- ✅ **云存储** - 集成 Supabase Storage
+- 🚧 **生产部署** - 需要配置环境变量
 
 ## 🎨 设计特色
 
@@ -133,8 +154,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ## 🔮 后续计划
 
-- [ ] 集成真实 AI 着色服务（Replicate）
-- [ ] 配置云存储服务（Supabase）
+- [x] 集成真实 AI 着色服务（Replicate）
+- [x] 配置云存储服务（Supabase）
 - [ ] 添加批量处理功能
 - [ ] 支持更多图片格式
 - [ ] 优化处理速度和效果
@@ -143,12 +164,23 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 - [ ] 添加图片历史记录
 - [ ] 支持图片分享功能
 
-## 🚨 已知问题
+## 🚨 配置说明
 
-目前使用 Mock 数据进行演示：
-- AI 着色功能返回固定的演示图片
-- 文件上传使用本地 Blob URL
-- 处理时间为模拟延迟
+### 完整功能配置
+如需使用完整的云端功能，请配置：
+- ✅ **Replicate API Token** - AI图像处理
+- ✅ **Supabase 项目和存储桶** - 云端存储
+- ✅ **存储桶RLS策略** - 权限控制
+
+### 本地测试模式
+**无需配置任何环境变量即可使用！**
+- 📎 **自动降级** - 未配置时使用本地Blob URL
+- ⚡ **即用即试** - 直接上传测试功能
+- 🔄 **优雅降级** - Supabase失败时自动切换到本地模式
+
+**调试工具:**
+- 访问 `/debug-upload` 页面诊断文件格式问题
+- 查看控制台日志了解详细的验证过程
 
 ## 🧪 开发注意事项
 

@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 // Database Types
 export interface Profile {
@@ -26,18 +26,29 @@ export interface Database {
   }
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
+// Create client - will use fallback if not configured
+export const supabase = createClient(
+  supabaseUrl || 'https://dummy.supabase.co',
+  supabaseAnonKey || 'dummy-key'
+)
 
 const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET || 'photo-restoration-images'
 
 export async function uploadToStorage(file: File): Promise<string> {
-  console.log('🚀 [SUPABASE] Starting file upload...')
-  console.log('📁 [SUPABASE] File details:', {
+  console.log('🚀 [UPLOAD] Starting file upload...')
+  console.log('📁 [UPLOAD] File details:', {
     name: file.name,
     size: file.size,
     type: file.type,
     lastModified: new Date(file.lastModified).toISOString()
   })
+
+  // Check if Supabase is properly configured
+  if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes('dummy')) {
+    console.log('⚠️ [UPLOAD] Supabase not configured, using base64 data URL fallback')
+    return await createLocalBlobUrl(file)
+  }
+
   console.log('🔧 [SUPABASE] Config:', {
     url: supabaseUrl,
     bucket: BUCKET_NAME,
@@ -130,8 +141,30 @@ export async function uploadToStorage(file: File): Promise<string> {
 
   } catch (error) {
     console.error('💥 [SUPABASE] Upload failed with error:', error)
-    throw error
+    console.log('🔄 [UPLOAD] Falling back to base64 data URL')
+    return await createLocalBlobUrl(file)
   }
+}
+
+// Fallback function to convert file to base64 data URL (compatible with Replicate)
+function createLocalBlobUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    
+    reader.onload = () => {
+      const dataUrl = reader.result as string
+      console.log('📎 [UPLOAD] Created base64 data URL:', dataUrl.substring(0, 60) + '...')
+      resolve(dataUrl)
+    }
+    
+    reader.onerror = () => {
+      console.error('❌ [UPLOAD] Failed to read file as base64')
+      reject(new Error('Failed to convert file to base64'))
+    }
+    
+    // Convert to base64 data URL (data:image/jpeg;base64,...)
+    reader.readAsDataURL(file)
+  })
 }
 
 // Auth Functions

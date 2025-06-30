@@ -16,7 +16,14 @@ export async function GET(
       return NextResponse.json({ error: 'Prediction ID is required' }, { status: 400 })
     }
 
-    const token = REPLICATE_READ_TOKEN || process.env.REPLICATE_API_TOKEN!
+    const token = REPLICATE_READ_TOKEN || process.env.REPLICATE_API_TOKEN
+    
+    if (!token) {
+      console.error('Neither REPLICATE_READ_TOKEN nor REPLICATE_API_TOKEN is configured')
+      return NextResponse.json({ 
+        error: 'AI服务未配置，请检查环境变量' 
+      }, { status: 500 })
+    }
     
     const response = await fetch(`${REPLICATE_API_BASE}/predictions/${id}`, {
       method: 'GET',
