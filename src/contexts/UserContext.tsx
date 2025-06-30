@@ -202,10 +202,19 @@ export function UserProvider({ children }: { children: ReactNode }) {
   // Sign in existing user
   const signIn = async (email: string, password: string): Promise<boolean> => {
     try {
+      console.log('尝试登录用户:', email)
       const { user: authUser } = await signInWithEmail(email, password)
-      return !!authUser
+      console.log('登录响应:', { user: authUser?.email, confirmed: authUser?.email_confirmed_at })
+      
+      if (authUser) {
+        console.log('登录成功，用户ID:', authUser.id)
+        return true
+      }
+      
+      console.log('登录失败：未返回用户信息')
+      return false
     } catch (error: unknown) {
-      console.error('Sign in error:', error)
+      console.error('登录错误详情:', error)
       
       // Handle specific Supabase errors
       if (error instanceof Error && error.message?.includes('For security purposes')) {
@@ -213,7 +222,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
       } else if (error instanceof Error && error.message?.includes('Invalid login credentials')) {
         throw new Error('邮箱或密码错误')
       } else if (error instanceof Error && error.message?.includes('Email not confirmed')) {
-        throw new Error('请先验证邮箱')
+        // Email verification is disabled, this should not happen
+        console.warn('Email not confirmed error received but verification is disabled')
+        throw new Error('账户验证失败，请重试')
       } else if (error instanceof Error && error.message?.includes('Too many requests')) {
         throw new Error('请求过于频繁，请稍后再试')
       }

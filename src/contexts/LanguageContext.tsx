@@ -74,6 +74,11 @@ const translations = {
     'upload.hdOutput': '2K 高清输出',
     'upload.error': '处理失败',
     'upload.errorDesc': '请检查图片格式并重试',
+    'upload.guestModeInfo': '游客模式每日可免费体验 <strong>10</strong> 次，登录后可使用 <strong>20</strong> 次',
+    'upload.loginToGet': '登录获得 20 次使用权限',
+    'upload.guestModeToast': '游客模式：每日可免费体验2次',
+    'upload.invalidImageFormat': '请上传图片文件（JPG、PNG、WebP 等格式）',
+    'upload.fileTypeWarning': '文件类型可能不支持，正在尝试处理...',
     
     // Result Comparison
     'result.sideBySide': '并排对比',
@@ -271,6 +276,11 @@ const translations = {
     'upload.hdOutput': '📱 2K HD Output',
     'upload.error': 'Processing Failed',
     'upload.errorDesc': 'Please check image format and try again',
+    'upload.guestModeInfo': 'Guest mode: <strong>10</strong> free trials daily, <strong>20</strong> uses after login',
+    'upload.loginToGet': 'Login to get 20 usage rights',
+    'upload.guestModeToast': 'Guest mode: 2 free trials daily',
+    'upload.invalidImageFormat': 'Please upload image files (JPG, PNG, WebP formats)',
+    'upload.fileTypeWarning': 'File type may not be supported, trying to process...',
     
     // Result Comparison
     'result.sideBySide': 'Side by Side',
@@ -390,7 +400,7 @@ const translations = {
     'auth.passwordRequired': 'Please enter a password',
     'auth.nameRequired': 'Please enter your name',
     'auth.signinSuccess': 'Sign in successful!',
-    'auth.signupSuccess': 'Account created! Please check your email for verification',
+    'auth.signupSuccess': 'Account created successfully! You can start using the service now',
     'auth.signinFailed': 'Sign in failed, please check email and password',
     'auth.signupFailed': 'Sign up failed, please try again',
     'auth.noAccount': 'Don\'t have an account?',

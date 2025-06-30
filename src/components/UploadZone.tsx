@@ -27,7 +27,7 @@ export default function UploadZone() {
     // 检查登录状态 - 允许游客使用
     if (!user) {
       console.log('🚀 [UPLOAD] Guest user detected, allowing upload with limitations')
-      toast.info('游客模式：每日可免费体验2次', {
+      toast.info(t('upload.guestModeToast'), {
         position: 'top-center',
         duration: 3000
       })
@@ -65,7 +65,7 @@ export default function UploadZone() {
     
     // 只在明显不是图片时才拒绝
     if (!hasValidExtension && !file.type.startsWith('image/')) {
-      toast.error('请上传图片文件（JPG、PNG、WebP 等格式）', {
+      toast.error(t('upload.invalidImageFormat'), {
         position: 'top-center',
         duration: 3000
       })
@@ -81,7 +81,7 @@ export default function UploadZone() {
     
     // 基本上接受所有图片，只在明显有问题时提醒
     if (file.type && !file.type.startsWith('image/') && !hasValidExtension) {
-      toast.warning('文件类型可能不支持，正在尝试处理...', {
+      toast.warning(t('upload.fileTypeWarning'), {
         position: 'top-center',
         duration: 2000
       })
@@ -242,9 +242,7 @@ export default function UploadZone() {
                         <p className="text-xl font-semibold text-foreground">
                           {t('upload.dragAndDrop')}
                         </p>
-                        <p className="text-muted-foreground">
-                          游客模式每日可免费体验 <strong>10</strong> 次，登录后可使用 <strong>20</strong> 次
-                        </p>
+                        <p className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: t('upload.guestModeInfo') }} />
                       </div>
                       <Button 
                         onClick={(e) => {
@@ -255,7 +253,7 @@ export default function UploadZone() {
                         className="mx-auto"
                       >
                         <Crown className="w-4 h-4 mr-2" />
-                        登录获得 20 次使用权限
+                        {t('upload.loginToGet')}
                       </Button>
                     </div>
                   </>
