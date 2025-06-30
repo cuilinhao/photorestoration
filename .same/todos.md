@@ -14,7 +14,7 @@
 - [x] UploadZone.tsx - 拖拽上传框 + 状态机
 - [x] ResultSlider.tsx - 用户结果对比滑块
 - [x] Loader.tsx - Loader2 包装
-
+### test
 ### API 和工具函数
 - [x] lib/replicate.ts - Stub API
 - [x] lib/supabase.ts - Stub API
