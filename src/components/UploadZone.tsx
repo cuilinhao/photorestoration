@@ -247,7 +247,10 @@ export default function UploadZone() {
                         </p>
                       </div>
                       <Button 
-                        onClick={() => setShowLoginModal(true)}
+                        onClick={(e) => {
+                          e.stopPropagation() // 阻止事件冒泡到上传区域
+                          setShowLoginModal(true)
+                        }}
                         variant="outline"
                         className="mx-auto"
                       >
