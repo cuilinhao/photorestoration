@@ -35,9 +35,19 @@ export async function POST(request: NextRequest) {
     })
 
     if (!response.ok) {
-      const error = await response.text()
+      const errorText = await response.text()
+      console.error('Replicate API 错误:', response.status, errorText)
+      
+      let errorMessage = '处理失败，请检查图片格式后重试'
+      
+      if (response.status === 422) {
+        errorMessage = '图片格式不支持，请使用 JPG 或 PNG 格式'
+      } else if (response.status === 500) {
+        errorMessage = '服务器错误，请稍后重试'
+      }
+      
       return NextResponse.json(
-        { error: `API error: ${response.status}` }, 
+        { error: errorMessage }, 
         { status: response.status }
       )
     }
@@ -46,6 +56,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ id: data.id, status: data.status })
 
   } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('处理图片请求错误:', error)
+    return NextResponse.json({ error: '服务器内部错误，请稍后重试' }, { status: 500 })
   }
 } 

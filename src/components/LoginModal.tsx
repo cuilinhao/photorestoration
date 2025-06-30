@@ -28,7 +28,7 @@ export default function LoginModal({ isOpen, onClose, language = 'zh' }: LoginMo
 
   const text = {
     zh: {
-      title: "登录 ColorOld",
+      title: "登录 Photo Restoration",
       subtitle: "输入您的邮箱地址开始使用 AI 照片修复服务",
       emailLabel: "邮箱地址",
       emailPlaceholder: "请输入您的邮箱",
@@ -47,7 +47,7 @@ export default function LoginModal({ isOpen, onClose, language = 'zh' }: LoginMo
       loginFailed: "登录失败，请重试"
     },
     en: {
-      title: "Sign In to ColorOld",
+      title: "Sign In to Photo Restoration",
       subtitle: "Enter your email address to start using AI photo restoration service",
       emailLabel: "Email Address",
       emailPlaceholder: "Enter your email",
@@ -104,7 +104,7 @@ export default function LoginModal({ isOpen, onClose, language = 'zh' }: LoginMo
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">C</span>
+              <span className="text-primary-foreground font-bold text-xs">PR</span>
             </div>
             {t.title}
           </DialogTitle>

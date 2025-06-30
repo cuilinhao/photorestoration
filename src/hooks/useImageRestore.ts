@@ -14,30 +14,52 @@ interface RestoreState {
 
 // 图像压缩工具函数
 const compressImage = (file: File, maxSize: number): Promise<File> => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const canvas = document.createElement('canvas')
-    const ctx = canvas.getContext('2d')!
+    const ctx = canvas.getContext('2d')
+    
+    if (!ctx) {
+      reject(new Error('无法创建画布上下文'))
+      return
+    }
+    
     const img = new Image()
     
     img.onload = () => {
-      const { width, height } = img
-      if (width <= maxSize && height <= maxSize) {
-        resolve(file)
-        return
-      }
-      
-      const ratio = Math.min(maxSize / width, maxSize / height)
-      canvas.width = Math.floor(width * ratio)
-      canvas.height = Math.floor(height * ratio)
-      
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
-      canvas.toBlob((blob) => {
-        if (blob) {
-          resolve(new File([blob], file.name, { type: file.type, lastModified: Date.now() }))
-        } else {
+      try {
+        const { width, height } = img
+        
+        // 如果图片尺寸已经符合要求，直接返回原文件
+        if (width <= maxSize && height <= maxSize) {
           resolve(file)
+          return
         }
-      }, file.type, 0.9)
+        
+        // 计算压缩比例
+        const ratio = Math.min(maxSize / width, maxSize / height)
+        canvas.width = Math.floor(width * ratio)
+        canvas.height = Math.floor(height * ratio)
+        
+        // 绘制压缩后的图像
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            resolve(new File([blob], file.name, { type: file.type, lastModified: Date.now() }))
+          } else {
+            reject(new Error('图片压缩失败'))
+          }
+        }, file.type, 0.9)
+        
+      } catch (error) {
+        reject(new Error('图片处理过程中出错'))
+      } finally {
+        URL.revokeObjectURL(img.src)
+      }
+    }
+    
+    img.onerror = () => {
+      reject(new Error('图片加载失败，请检查图片格式'))
     }
     
     img.src = URL.createObjectURL(file)
@@ -78,7 +100,7 @@ export function useImageRestore() {
           setState(prev => ({
             ...prev,
             status: 'error',
-            error: '处理失败，请重试'
+            error: result.error || '处理失败，请检查图片格式后重试'
           }))
           return
         }
@@ -86,10 +108,11 @@ export function useImageRestore() {
         // 继续轮询
         setTimeout(poll, 3000)
       } catch (error) {
+        console.error('轮询错误:', error)
         setState(prev => ({
           ...prev,
           status: 'error',
-          error: '网络错误，请重试'
+          error: error instanceof Error ? error.message : '网络错误，请重试'
         }))
       }
     }
@@ -124,10 +147,11 @@ export function useImageRestore() {
       pollProgress(prediction.id)
 
     } catch (error) {
+      console.error('处理图片错误:', error)
       setState(prev => ({
         ...prev,
         status: 'error',
-        error: '上传失败，请重试'
+        error: error instanceof Error ? error.message : '上传失败，请检查图片格式后重试'
       }))
     }
   }

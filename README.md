@@ -1,4 +1,4 @@
-# ColorOld - AI 黑白照片着色工具
+# Photo Restoration - AI 黑白照片着色工具
 
 一个基于 Next.js 15 和 AI 技术的老照片着色 Web 应用，让您的黑白历史照片瞬间重焕色彩！
 
@@ -41,7 +41,7 @@
 ```bash
 # 克隆项目
 git clone <your-repo-url>
-cd colorold
+cd photo-restoration
 
 # 安装依赖
 npm install
@@ -56,7 +56,7 @@ npm run dev
 ## 📁 项目结构
 
 ```
-colorold/
+photo-restoration/
 ├── src/
 │   ├── app/                    # Next.js App Router
 │   │   ├── page.tsx           # 首页

@@ -27,8 +27,16 @@ export async function GET(
     })
 
     if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`获取预测状态错误 (${id}):`, response.status, errorText)
+      
+      let errorMessage = '获取处理状态失败，请重试'
+      if (response.status === 404) {
+        errorMessage = '处理任务不存在或已过期'
+      }
+      
       return NextResponse.json(
-        { error: `API error: ${response.status}` },
+        { error: errorMessage },
         { status: response.status }
       )
     }
@@ -37,6 +45,7 @@ export async function GET(
     return NextResponse.json(data)
 
   } catch (error) {
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    console.error('获取预测状态错误:', error)
+    return NextResponse.json({ error: '服务器内部错误，请稍后重试' }, { status: 500 })
   }
 } 

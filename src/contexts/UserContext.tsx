@@ -44,7 +44,7 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
-const FREE_USAGE_LIMIT = 1
+const FREE_USAGE_LIMIT = 20
 
 // Helper function to convert profile to user format
 const profileToUser = (profile: Profile): User => ({
@@ -66,18 +66,26 @@ export function UserProvider({ children }: { children: ReactNode }) {
   // Load user profile from database
   const loadUserProfile = useCallback(async (userId: string) => {
     try {
+      console.log('Loading user profile for:', userId)
+      
       let userProfile = await getProfile(userId)
       
-      // If profile doesn't exist, create it
-      if (!userProfile && supabaseUser) {
-        userProfile = await createProfile({
-          email: supabaseUser.email!,
-          full_name: supabaseUser.user_metadata?.full_name
-        })
+      // If profile doesn't exist, create it using current supabase user
+      if (!userProfile) {
+        const { data: { user: currentUser } } = await supabase.auth.getUser()
+        if (currentUser) {
+          console.log('Creating new profile for user:', currentUser.email)
+          userProfile = await createProfile({
+            email: currentUser.email!,
+            full_name: currentUser.user_metadata?.full_name
+          })
+        }
       }
 
       if (userProfile) {
+        console.log('Profile loaded successfully:', userProfile.email)
         setProfile(userProfile)
+        
         // Load usage data from localStorage for now (later can be moved to database)
         const savedUsage = localStorage.getItem(`usage_${userId}`)
         let usageData = { usageCount: 0, lastUsageDate: new Date().toISOString() }
@@ -96,12 +104,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
           lastUsageDate: usageData.lastUsageDate
         }
         
+        console.log('Setting user data:', userData.email)
         setUser(userData)
+      } else {
+        console.error('Failed to load or create user profile')
       }
     } catch (error) {
       console.error('Error loading user profile:', error)
+      // Don't throw error, just log it to prevent breaking the auth flow
     }
-  }, [supabaseUser])
+  }, [])
 
   // Initialize auth state
   useEffect(() => {
@@ -142,6 +154,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
           setProfile(null)
           setUser(null)
         }
+        
+        // Ensure loading state is updated after auth change
+        setIsLoading(false)
       }
     )
 
@@ -162,19 +177,19 @@ export function UserProvider({ children }: { children: ReactNode }) {
       }
       
       return false
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign up error:', error)
       
       // Handle specific Supabase errors
-      if (error?.message?.includes('For security purposes')) {
+      if (error instanceof Error && error.message?.includes('For security purposes')) {
         throw new Error('操作频繁，请稍后再试')
-      } else if (error?.message?.includes('User already registered')) {
+      } else if (error instanceof Error && error.message?.includes('User already registered')) {
         throw new Error('该邮箱已被注册')
-      } else if (error?.message?.includes('Invalid login credentials')) {
+      } else if (error instanceof Error && error.message?.includes('Invalid login credentials')) {
         throw new Error('邮箱或密码错误')
-      } else if (error?.message?.includes('Password should be at least')) {
+      } else if (error instanceof Error && error.message?.includes('Password should be at least')) {
         throw new Error('密码至少需蝑6位字符')
-      } else if (error?.message?.includes('Unable to validate email address')) {
+      } else if (error instanceof Error && error.message?.includes('Unable to validate email address')) {
         throw new Error('邮箱格式不正确')
       }
       
@@ -188,17 +203,17 @@ export function UserProvider({ children }: { children: ReactNode }) {
     try {
       const { user: authUser } = await signInWithEmail(email, password)
       return !!authUser
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign in error:', error)
       
       // Handle specific Supabase errors
-      if (error?.message?.includes('For security purposes')) {
+      if (error instanceof Error && error.message?.includes('For security purposes')) {
         throw new Error('操作频繁，请稍后再试')
-      } else if (error?.message?.includes('Invalid login credentials')) {
+      } else if (error instanceof Error && error.message?.includes('Invalid login credentials')) {
         throw new Error('邮箱或密码错误')
-      } else if (error?.message?.includes('Email not confirmed')) {
+      } else if (error instanceof Error && error.message?.includes('Email not confirmed')) {
         throw new Error('请先验证邮箱')
-      } else if (error?.message?.includes('Too many requests')) {
+      } else if (error instanceof Error && error.message?.includes('Too many requests')) {
         throw new Error('请求过于频繁，请稍后再试')
       }
       
@@ -212,7 +227,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
     try {
       await supabaseSignOut()
       // State will be cleared via onAuthStateChange
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Sign out error:', error)
       // 即使退出失败，也手动清理本地状态
       setSupabaseUser(null)
@@ -220,7 +235,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
       setUser(null)
       
       // 如果是网络错误，不抛出异常
-      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+      if ((error instanceof Error && error.message?.includes('Failed to fetch')) || (error instanceof Error && error.message?.includes('NetworkError'))) {
         console.log('网络错误，本地退出登录')
         return
       }

@@ -28,7 +28,7 @@ export interface Database {
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
 
-const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET || 'colorold-images'
+const BUCKET_NAME = process.env.SUPABASE_STORAGE_BUCKET || 'photo-restoration-images'
 
 export async function uploadToStorage(file: File): Promise<string> {
   console.log('🚀 [SUPABASE] Starting file upload...')
@@ -201,13 +201,25 @@ export async function getProfile(userId: string): Promise<Profile | null> {
 }
 
 export async function createProfile(profile: Omit<Profile, 'id' | 'created_at' | 'updated_at'>): Promise<Profile> {
+  // Get current user to use their ID
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) {
+    throw new Error('No authenticated user found')
+  }
+
+  const profileData = {
+    id: user.id, // Use the auth user's ID
+    ...profile
+  }
+
   const { data, error } = await supabase
     .from('profiles')
-    .insert(profile)
+    .insert(profileData)
     .select()
     .single()
 
   if (error) {
+    console.error('Profile creation error:', error)
     throw error
   }
 

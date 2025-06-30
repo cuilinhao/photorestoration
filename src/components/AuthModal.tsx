@@ -64,12 +64,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
               position: 'top-center',
               duration: 3000
             })
-            onClose()
             resetForm()
+            onClose()
           }
-        } catch (error: any) {
-          console.log('用户注册失败:', { email: email.trim(), error: error.message })
-          toast.error(error.message || t('auth.signupFailed'), {
+        } catch (error: unknown) {
+          console.log('用户注册失败:', { email: email.trim(), error: error instanceof Error ? error.message : String(error) })
+          toast.error((error instanceof Error ? error.message : String(error)) || t('auth.signupFailed'), {
             position: 'top-center',
             duration: 4000
           })
@@ -85,12 +85,12 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
               position: 'top-center',
               duration: 3000
             })
-            onClose()
             resetForm()
+            onClose()
           }
-        } catch (error: any) {
-          console.log('用户登录失败:', { email: email.trim(), error: error.message })
-          toast.error(error.message || t('auth.signinFailed'), {
+        } catch (error: unknown) {
+          console.log('用户登录失败:', { email: email.trim(), error: error instanceof Error ? error.message : String(error) })
+          toast.error((error instanceof Error ? error.message : String(error)) || t('auth.signinFailed'), {
             position: 'top-center',
             duration: 4000
           })
@@ -130,7 +130,7 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">C</span>
+              <span className="text-primary-foreground font-bold text-xs">PR</span>
             </div>
             {mode === 'signup' ? t('auth.signupTitle') : t('auth.signinTitle')}
           </DialogTitle>

@@ -34,7 +34,7 @@ export default function FeatureSection() {
       <div className="container">
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-5xl font-bold mb-4">
-            {t('features.title')} <span className="bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent">ColorOld</span>
+            {t('features.title')} <span className="bg-gradient-to-r from-primary via-primary to-primary bg-clip-text text-transparent">Photo Restoration</span>
           </h2>
           <p className="text-muted-foreground lg:text-xl max-w-3xl mx-auto">
             {t('features.subtitle')}

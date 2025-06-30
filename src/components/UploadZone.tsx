@@ -43,8 +43,21 @@ export default function UploadZone() {
       return
     }
 
-    if (!file.type.match(/^image\/(jpeg|jpg|png)$/)) {
+    // 检查文件类型
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png']
+    if (!validTypes.includes(file.type)) {
       toast.error(t('upload.invalidFormat'), {
+        position: 'top-center',
+        duration: 3000
+      })
+      return
+    }
+    
+    // 通过文件扩展名进行额外验证
+    const validExtensions = ['.jpg', '.jpeg', '.png']
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
+    if (!validExtensions.includes(fileExtension)) {
+      toast.error('请上传 JPG 或 PNG 格式的图片', {
         position: 'top-center',
         duration: 3000
       })
@@ -96,8 +109,8 @@ export default function UploadZone() {
     // 保持在上传区域，不跳转到顶部
   }
 
-  // 错误处理
-  if (error) {
+  // 错误处理 - 只在状态为error时显示错误
+  if (status === 'error' && error) {
     toast.error(error, {
       position: 'top-center',
       duration: 4000

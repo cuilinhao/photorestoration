@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Menu, Moon, Sun, Globe, LogIn, User, LogOut } from "lucide-react"
@@ -9,16 +9,35 @@ import { useLanguage } from "@/contexts/LanguageContext"
 import AuthModal from "@/components/AuthModal"
 
 export default function Header() {
-  const [isDark, setIsDark] = useState(false)
+  const [isDark, setIsDark] = useState(true)
   const [showLoginModal, setShowLoginModal] = useState(false)
-  const { user, logout, getRemainingUses } = useUser()
+  const { user, logout, getRemainingUses, isLoading } = useUser()
   const { language, setLanguage, t } = useLanguage()
-  const isLoggedIn = !!user
+  const isLoggedIn = !!user && !isLoading
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
+  // 初始化主题设置
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('photo_restoration_theme')
+    if (savedTheme === 'light') {
+      setIsDark(false)
+      document.documentElement.classList.remove('dark')
+    } else if (savedTheme === 'dark') {
+      setIsDark(true)
+      document.documentElement.classList.add('dark')
+    } else {
+      // 如果没有保存的主题设置，默认设置为深色
+      setIsDark(true)
+      document.documentElement.classList.add('dark')
+      localStorage.setItem('photo_restoration_theme', 'dark')
+    }
+  }, [])
+
   const toggleTheme = () => {
-    setIsDark(!isDark)
+    const newIsDark = !isDark
+    setIsDark(newIsDark)
     document.documentElement.classList.toggle('dark')
+    localStorage.setItem('photo_restoration_theme', newIsDark ? 'dark' : 'light')
   }
 
   const toggleLanguage = () => {
@@ -47,10 +66,10 @@ export default function Header() {
         {/* Logo */}
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">C</span>
+            <span className="text-primary-foreground font-bold text-xs">PR</span>
           </div>
           <span className="font-bold text-xl">
-            ColorOld
+            Photo Restoration
           </span>
           <Badge variant="secondary" className="hidden sm:inline-flex">
             AI

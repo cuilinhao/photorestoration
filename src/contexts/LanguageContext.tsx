@@ -123,14 +123,14 @@ const translations = {
     'footer.about': '关于我们',
     'footer.privacy': '隐私政策',
     'footer.terms': '使用条款',
-    'footer.copyright': '© 2024 ColorOld. 保留所有权利。',
+    'footer.copyright': '© 2024 Photo Restoration. 保留所有权利。',
     
     // Testimonials
     'testimonials.title': '用户好评',
-    'testimonials.subtitle': '看看其他用户如何使用 ColorOld 修复珍贵回忆',
+    'testimonials.subtitle': '看看其他用户如何使用 Photo Restoration 修复珍贵回忆',
     
     // FAQ 
-    'faq.q1': 'ColorOld 支持哪些图片格式？',
+    'faq.q1': 'Photo Restoration 支持哪些图片格式？',
     'faq.a1': '我们支持 JPG、JPEG 和 PNG 格式的图片。为了获得最佳效果，建议上传高质量的原图。文件大小限制为 8MB。',
     'faq.q2': 'AI 修复需要多长时间？',
     'faq.a2': '通常只需要 30-90 秒即可完成修复。处理时间取决于图片的复杂程度和服务器负载情况。我们的 FLUX AI 模型经过优化，能够快速处理大多数照片。',
@@ -173,8 +173,8 @@ const translations = {
     'cases.case5.testimonial': '这种经典的黑白照片修复效果真是令人惊艳，FLUX技术太强大了！',
     
     // Auth Modal
-    'auth.signinTitle': '登录 ColorOld',
-    'auth.signupTitle': '注册 ColorOld',
+    'auth.signinTitle': '登录 Photo Restoration',
+    'auth.signupTitle': '注册 Photo Restoration',
     'auth.signinSubtitle': '登录您的账户开始使用 AI 照片修复服务',
     'auth.signupSubtitle': '创建新账户，享受 AI 照片修复服务',
     'auth.fullNameLabel': '姓名',
@@ -200,7 +200,7 @@ const translations = {
     'auth.signinLink': '立即登录',
     'auth.signupLink': '免费注册',
     'auth.freeFeatures': '免费用户权益',
-    'auth.feature1': '每月 1 次免费修复',
+    'auth.feature1': '每月 20 次免费修复',
     'auth.feature2': '高质量 AI 修复',
     'auth.feature3': '2K 高清输出',
     'auth.premiumFeatures': '付费用户额外权益',
@@ -318,14 +318,14 @@ const translations = {
     'footer.about': 'About Us',
     'footer.privacy': 'Privacy Policy',
     'footer.terms': 'Terms of Service',
-    'footer.copyright': '© 2024 ColorOld. All rights reserved.',
+    'footer.copyright': '© 2024 Photo Restoration. All rights reserved.',
     
     // Testimonials
     'testimonials.title': 'User Reviews',
-    'testimonials.subtitle': 'See how other users restore precious memories with ColorOld',
+    'testimonials.subtitle': 'See how other users restore precious memories with Photo Restoration',
     
     // FAQ
-    'faq.q1': 'What image formats does ColorOld support?',
+    'faq.q1': 'What image formats does Photo Restoration support?',
     'faq.a1': 'We support JPG, JPEG, and PNG formats. For best results, we recommend uploading high-quality original images. File size limit is 8MB.',
     'faq.q2': 'How long does AI restoration take?',
     'faq.a2': 'Usually takes only 30-90 seconds to complete restoration. Processing time depends on image complexity and server load. Our FLUX AI model is optimized for fast processing of most photos.',
@@ -368,8 +368,8 @@ const translations = {
     'cases.case5.testimonial': 'The restoration effect of this classic black and white photo is truly stunning, FLUX technology is so powerful!',
     
     // Auth Modal
-    'auth.signinTitle': 'Sign In to ColorOld',
-    'auth.signupTitle': 'Sign Up for ColorOld',
+    'auth.signinTitle': 'Sign In to Photo Restoration',
+    'auth.signupTitle': 'Sign Up for Photo Restoration',
     'auth.signinSubtitle': 'Sign in to your account to start using AI photo restoration service',
     'auth.signupSubtitle': 'Create a new account to enjoy AI photo restoration service',
     'auth.fullNameLabel': 'Full Name',
@@ -395,7 +395,7 @@ const translations = {
     'auth.signinLink': 'Sign In',
     'auth.signupLink': 'Sign Up Free',
     'auth.freeFeatures': 'Free User Benefits',
-    'auth.feature1': '1 free restoration per month',
+    'auth.feature1': '20 free restorations per month',
     'auth.feature2': 'High-quality AI restoration',
     'auth.feature3': '2K HD output',
     'auth.premiumFeatures': 'Premium User Benefits',
@@ -407,20 +407,24 @@ const translations = {
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguage] = useState<Language>('zh')
+  const [language, setLanguage] = useState<Language>('en')
 
   // 从 localStorage 加载语言设置
   useEffect(() => {
-    const savedLanguage = localStorage.getItem('colorold_language') as Language
+    const savedLanguage = localStorage.getItem('photo_restoration_language') as Language
     if (savedLanguage && (savedLanguage === 'zh' || savedLanguage === 'en')) {
       setLanguage(savedLanguage)
+    } else {
+      // 如果没有保存的语言设置，默认设置为英文
+      setLanguage('en')
+      localStorage.setItem('photo_restoration_language', 'en')
     }
   }, [])
 
   // 保存语言设置到 localStorage
   const handleSetLanguage = (lang: Language) => {
     setLanguage(lang)
-    localStorage.setItem('colorold_language', lang)
+    localStorage.setItem('photo_restoration_language', lang)
   }
 
   // 翻译函数
