@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import ClientBody from "./ClientBody";
 import { Toaster } from "@/components/ui/sonner";
@@ -28,6 +29,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`dark ${geistSans.variable} ${geistMono.variable}`}>
+      {/* Google tag (gtag.js) */}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-NYXXMHY8GM"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-NYXXMHY8GM');
+        `}
+      </Script>
       <body suppressHydrationWarning className="antialiased">
         <LanguageProvider>
           <UserProvider>
