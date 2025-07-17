@@ -44,8 +44,8 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
-const GUEST_USAGE_LIMIT = 10  // 未登录用户限制
-const LOGGED_IN_USAGE_LIMIT = 20  // 登录用户限制
+const GUEST_USAGE_LIMIT = 5  // 未登录用户限制
+const LOGGED_IN_USAGE_LIMIT = 8  // 登录用户限制
 
 // Helper function to convert profile to user format
 const profileToUser = (profile: Profile): User => ({
