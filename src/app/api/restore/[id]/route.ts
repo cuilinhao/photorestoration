@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getErrorMessage } from '@/lib/server-translations'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,15 +14,15 @@ export async function GET(
     const { id } = await params
 
     if (!id) {
-      return NextResponse.json({ error: 'Prediction ID is required' }, { status: 400 })
+      return NextResponse.json({ error: getErrorMessage(request, 'error.predictionIdRequired') }, { status: 400 })
     }
 
     const token = REPLICATE_READ_TOKEN || process.env.REPLICATE_API_TOKEN
     
     if (!token) {
       console.error('Neither REPLICATE_READ_TOKEN nor REPLICATE_API_TOKEN is configured')
-      return NextResponse.json({ 
-        error: 'AI服务未配置，请检查环境变量' 
+      return NextResponse.json({
+        error: getErrorMessage(request, 'error.aiServiceNotConfigured')
       }, { status: 500 })
     }
     
@@ -37,9 +38,9 @@ export async function GET(
       const errorText = await response.text()
       console.error(`获取预测状态错误 (${id}):`, response.status, errorText)
       
-      let errorMessage = '获取处理状态失败，请重试'
+      let errorMessage = getErrorMessage(request, 'error.getStatusFailed')
       if (response.status === 404) {
-        errorMessage = '处理任务不存在或已过期'
+        errorMessage = getErrorMessage(request, 'error.taskNotFound')
       }
       
       return NextResponse.json(
@@ -53,6 +54,6 @@ export async function GET(
 
   } catch (error) {
     console.error('获取预测状态错误:', error)
-    return NextResponse.json({ error: '服务器内部错误，请稍后重试' }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(request, 'error.internalServerError') }, { status: 500 })
   }
 } 

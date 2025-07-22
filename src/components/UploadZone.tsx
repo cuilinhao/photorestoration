@@ -14,9 +14,9 @@ import { useUser } from "@/contexts/UserContext"
 import { useLanguage } from "@/contexts/LanguageContext"
 
 export default function UploadZone() {
-  const { status, originalImage, restoredImage, progress, error, processImage, reset, downloadImage } = useImageRestore()
-  const { user, canUseService, incrementUsage, getRemainingUses } = useUser()
   const { language, t } = useLanguage()
+  const { user, canUseService, incrementUsage, getRemainingUses } = useUser()
+  const { status, originalImage, restoredImage, progress, error, processImage, reset, downloadImage } = useImageRestore(language, !!user)
   const [showLoginModal, setShowLoginModal] = useState(false)
 
   // 文件验证和处理
@@ -24,24 +24,25 @@ export default function UploadZone() {
     const file = acceptedFiles[0]
     if (!file) return
 
-    // 检查登录状态 - 允许游客使用
+    // 检查使用次数限制（登录和未登录用户都需要检查）
+    if (!canUseService()) {
+      toast.error(t('upload.usageExhausted'), {
+        position: 'top-center',
+        duration: 3000
+      })
+      return
+    }
+
+    // 增加使用次数
+    incrementUsage()
+
+    // 显示相应的提示信息
     if (!user) {
       console.log('🚀 [UPLOAD] Guest user detected, allowing upload with limitations')
       toast.info(t('upload.guestModeToast'), {
         position: 'top-center',
         duration: 3000
       })
-    } else {
-      // 检查使用次数（仅对登录用户）
-      if (!canUseService()) {
-        toast.error(t('upload.usageExhausted'), {
-          position: 'top-center',
-          duration: 3000
-        })
-        return
-      }
-      // 增加使用次数
-      incrementUsage()
     }
 
     // 调试信息
@@ -104,7 +105,7 @@ export default function UploadZone() {
       'image/*': [], // 接受所有图片类型
     },
     multiple: false,
-    disabled: status !== 'idle' || (!!user && !canUseService()),
+    disabled: status !== 'idle' || !canUseService(),
     // 完全不限制文件类型，让我们的自定义验证处理
     validator: undefined
   })
@@ -231,33 +232,7 @@ export default function UploadZone() {
                       </p>
                     </div>
                   </>
-                ) : !user ? (
-                  // 游客模式状态
-                  <>
-                    <div className="w-20 h-20 mx-auto bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                      <Upload className="w-10 h-10 text-primary" />
-                    </div>
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <p className="text-xl font-semibold text-foreground">
-                          {t('upload.dragAndDrop')}
-                        </p>
-                        <p className="text-muted-foreground" dangerouslySetInnerHTML={{ __html: t('upload.guestModeInfo') }} />
-                      </div>
-                      <Button 
-                        onClick={(e) => {
-                          e.stopPropagation() // 阻止事件冒泡到上传区域
-                          setShowLoginModal(true)
-                        }}
-                        variant="outline"
-                        className="mx-auto"
-                      >
-                        <Crown className="w-4 h-4 mr-2" />
-                        {t('upload.loginToGet')}
-                      </Button>
-                    </div>
-                  </>
-                ) : !!user && !canUseService() ? (
+                ) : !canUseService() ? (
                   // 使用次数耗尽状态
                   <>
                     <div className="w-20 h-20 mx-auto bg-yellow-100 rounded-2xl flex items-center justify-center mb-6">
@@ -300,10 +275,25 @@ export default function UploadZone() {
                         <p className="text-muted-foreground">
                           {t('upload.supportFormat')} <strong>JPG、PNG</strong> {t('upload.maxSize')} <strong>8MB</strong>
                         </p>
-                        {user && (
-                          <p className="text-sm text-primary font-medium">
-                            {t('upload.remainingUses')} {getRemainingUses() === -1 ? t('header.unlimited') : `${getRemainingUses()}${t('upload.times')}`}
-                          </p>
+                        <p className="text-sm text-primary font-medium">
+                          {t('upload.remainingUses')} {getRemainingUses() === -1 ? t('header.unlimited') : `${getRemainingUses()}${t('upload.times')}`}
+                        </p>
+                        {!user && (
+                          <div className="space-y-2">
+                            <p className="text-muted-foreground text-sm" dangerouslySetInnerHTML={{ __html: t('upload.guestModeInfo') }} />
+                            <Button
+                              onClick={(e) => {
+                                e.stopPropagation() // 阻止事件冒泡到上传区域
+                                setShowLoginModal(true)
+                              }}
+                              variant="outline"
+                              size="sm"
+                              className="mx-auto"
+                            >
+                              <Crown className="w-4 h-4 mr-2" />
+                              {t('upload.loginToGet')}
+                            </Button>
+                          </div>
                         )}
                       </div>
                       <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">

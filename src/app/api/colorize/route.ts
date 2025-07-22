@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { canUseServiceByIP, incrementIPUsage } from '@/lib/usage-limit'
+import { getErrorMessage } from '@/lib/server-translations'
 
 // 配置为动态路由，支持服务器端渲染
 export const dynamic = 'force-dynamic'
@@ -9,18 +11,26 @@ const MODEL_VERSION = '0da600fab0c45a66211339f1c16b71345d22f26ef5fea3dca1bb90bb5
 
 export async function POST(request: NextRequest) {
   try {
+    // 检查使用限制
+    if (!canUseServiceByIP(request)) {
+      return NextResponse.json(
+        { error: getErrorMessage(request, 'error.dailyLimitReached') },
+        { status: 429 }
+      )
+    }
+
     const { imageUrl } = await request.json()
 
     if (!imageUrl) {
       return NextResponse.json(
-        { error: 'Image URL is required' },
+        { error: getErrorMessage(request, 'error.imageUrlRequired') },
         { status: 400 }
       )
     }
 
     if (!REPLICATE_API_TOKEN) {
       return NextResponse.json(
-        { error: 'Replicate API token not configured' },
+        { error: getErrorMessage(request, 'error.replicateNotConfigured') },
         { status: 500 }
       )
     }
@@ -50,13 +60,16 @@ export async function POST(request: NextRequest) {
       const errorText = await response.text()
       console.error('❌ [API] Replicate error:', errorText)
       return NextResponse.json(
-        { error: `Replicate API error: ${response.status}` },
+        { error: getErrorMessage(request, 'error.processingFailed') },
         { status: response.status }
       )
     }
 
     const data = await response.json()
     console.log('✅ [API] Prediction created:', data.id)
+
+    // 增加使用次数
+    incrementIPUsage(request)
 
     return NextResponse.json({
       id: data.id,
@@ -66,7 +79,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('💥 [API] Colorize error:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getErrorMessage(request, 'error.internalServerError') },
       { status: 500 }
     )
   }

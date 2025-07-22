@@ -66,7 +66,7 @@ const compressImage = (file: File, maxSize: number): Promise<File> => {
   })
 }
 
-export function useImageRestore() {
+export function useImageRestore(language?: string, isLoggedIn?: boolean) {
   const [state, setState] = useState<RestoreState>({
     status: 'idle',
     originalImage: '',
@@ -79,7 +79,7 @@ export function useImageRestore() {
   const pollProgress = async (predictionId: string) => {
     const poll = async () => {
       try {
-        const result = await getPrediction(predictionId)
+        const result = await getPrediction(predictionId, language, isLoggedIn)
         
         // 更新进度
         const progress = parseDeoldifyPercent(result.logs || '') || state.progress
@@ -143,7 +143,7 @@ export function useImageRestore() {
       }))
 
       // 创建预测并开始轮询
-      const prediction = await createPrediction(imageUrl)
+      const prediction = await createPrediction(imageUrl, language, isLoggedIn)
       pollProgress(prediction.id)
 
     } catch (error) {

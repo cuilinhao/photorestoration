@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { getErrorMessage } from '@/lib/server-translations'
 
 // 配置为动态路由，支持服务器端渲染
 export const dynamic = 'force-dynamic'
@@ -20,7 +21,7 @@ export async function GET(
     if (!id) {
       console.error('❌ [API] No prediction ID provided')
       return NextResponse.json(
-        { error: 'Prediction ID is required' },
+        { error: getErrorMessage(request, 'error.predictionIdRequired') },
         { status: 400 }
       )
     }
@@ -47,7 +48,7 @@ export async function GET(
       const errorText = await response.text()
       console.error('❌ [API] Replicate error response:', errorText)
       return NextResponse.json(
-        { error: `Replicate API error: ${response.status}` },
+        { error: getErrorMessage(request, 'error.getStatusFailed') },
         { status: response.status }
       )
     }
@@ -66,7 +67,7 @@ export async function GET(
     console.error('💥 [API] Get prediction error:', error)
     console.error('💥 [API] Error stack:', error instanceof Error ? error.stack : 'No stack')
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: getErrorMessage(request, 'error.internalServerError') },
       { status: 500 }
     )
   }

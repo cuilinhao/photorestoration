@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { canUseServiceByIP, incrementIPUsage } from '@/lib/usage-limit'
+import { getErrorMessage } from '@/lib/server-translations'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,18 +11,26 @@ const RESTORE_MODEL_VERSION = process.env.REPLICATE_RESTORE_VERSION ||
 
 export async function POST(request: NextRequest) {
   try {
+    // 检查使用限制
+    if (!canUseServiceByIP(request)) {
+      return NextResponse.json(
+        { error: getErrorMessage(request, 'error.dailyLimitReached') },
+        { status: 429 }
+      )
+    }
+
     const { imageUrl } = await request.json()
 
     if (!imageUrl) {
-      return NextResponse.json({ error: 'Image URL is required' }, { status: 400 })
+      return NextResponse.json({ error: getErrorMessage(request, 'error.imageUrlRequired') }, { status: 400 })
     }
 
     console.log('🔍 [API] Received image URL type:', imageUrl.substring(0, 50) + '...')
 
     if (!REPLICATE_API_TOKEN) {
       console.error('REPLICATE_API_TOKEN not configured')
-      return NextResponse.json({ 
-        error: 'AI服务未配置，请检查环境变量REPLICATE_API_TOKEN' 
+      return NextResponse.json({
+        error: getErrorMessage(request, 'error.aiServiceNotConfigured')
       }, { status: 500 })
     }
 
@@ -62,16 +72,16 @@ export async function POST(request: NextRequest) {
       const errorText = await response.text()
       console.error('Replicate API 错误:', response.status, errorText)
       
-      let errorMessage = '处理失败，请检查图片格式后重试'
-      
+      let errorMessage = getErrorMessage(request, 'error.processingFailed')
+
       if (response.status === 422) {
         if (errorText.includes('Does not match format')) {
-          errorMessage = '图片URL格式错误，请重新上传图片'
+          errorMessage = getErrorMessage(request, 'error.imageUrlFormatError')
         } else {
-          errorMessage = '图片格式不支持，请使用 JPG 或 PNG 格式'
+          errorMessage = getErrorMessage(request, 'error.imageFormatNotSupported')
         }
       } else if (response.status === 500) {
-        errorMessage = '服务器错误，请稍后重试'
+        errorMessage = getErrorMessage(request, 'error.serverError')
       }
       
       return NextResponse.json(
@@ -82,10 +92,14 @@ export async function POST(request: NextRequest) {
 
     const data = await response.json()
     console.log('✅ [API] Prediction created successfully:', data.id)
+
+    // 增加使用次数
+    incrementIPUsage(request)
+
     return NextResponse.json({ id: data.id, status: data.status })
 
   } catch (error) {
     console.error('处理图片请求错误:', error)
-    return NextResponse.json({ error: '服务器内部错误，请稍后重试' }, { status: 500 })
+    return NextResponse.json({ error: getErrorMessage(request, 'error.internalServerError') }, { status: 500 })
   }
 } 

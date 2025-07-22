@@ -74,9 +74,9 @@ const translations = {
     'upload.hdOutput': '2K 高清输出',
     'upload.error': '处理失败',
     'upload.errorDesc': '请检查图片格式并重试',
-    'upload.guestModeInfo': '游客模式每日可免费体验 <strong>10</strong> 次，登录后可使用 <strong>20</strong> 次',
-    'upload.loginToGet': '登录获得 20 次使用权限',
-    'upload.guestModeToast': '游客模式：每日可免费体验2次',
+    'upload.guestModeInfo': '游客模式每日可免费体验 <strong>3</strong> 次，登录后可使用 <strong>5</strong> 次',
+    'upload.loginToGet': '登录获得 5 次使用权限',
+    'upload.guestModeToast': '游客模式：每日可免费体验3次',
     'upload.invalidImageFormat': '请上传图片文件（JPG、PNG、WebP 等格式）',
     'upload.fileTypeWarning': '文件类型可能不支持，正在尝试处理...',
     
@@ -102,6 +102,7 @@ const translations = {
     'common.downloadFailed': '下载失败，请重试',
     'common.upgradeComingSoon': '升级功能开发中，敬请期待！',
     'common.step': '步骤',
+    'common.dailyLimitReached': '每日使用次数已达上限，请明天再试',
     
     // Hero Section
     'hero.badge': '🏆 AI 照片修复领域佼佼者',
@@ -276,9 +277,9 @@ const translations = {
     'upload.hdOutput': '📱 2K HD Output',
     'upload.error': 'Processing Failed',
     'upload.errorDesc': 'Please check image format and try again',
-    'upload.guestModeInfo': 'Guest mode: <strong>10</strong> free trials daily, <strong>20</strong> uses after login',
-    'upload.loginToGet': 'Login to get 20 usage rights',
-    'upload.guestModeToast': 'Guest mode: 2 free trials daily',
+    'upload.guestModeInfo': 'Guest mode: <strong>3</strong> free trials daily, <strong>5</strong> uses after login',
+    'upload.loginToGet': 'Login to get 5 usage rights',
+    'upload.guestModeToast': 'Guest mode: 3 free trials daily',
     'upload.invalidImageFormat': 'Please upload image files (JPG, PNG, WebP formats)',
     'upload.fileTypeWarning': 'File type may not be supported, trying to process...',
     
@@ -304,6 +305,7 @@ const translations = {
     'common.downloadFailed': 'Download failed, please try again',
     'common.upgradeComingSoon': 'Upgrade feature coming soon!',
     'common.step': '',
+    'common.dailyLimitReached': 'Daily usage limit reached, please try again tomorrow',
     
     // Hero Section
     'hero.badge': '🏆 Leading AI Photo Restoration',

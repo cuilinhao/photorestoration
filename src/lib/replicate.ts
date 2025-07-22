@@ -8,10 +8,18 @@ interface PredictionResponse {
 }
 
 // 创建图像修复预测
-export async function createPrediction(imageUrl: string): Promise<PredictionResponse> {
+export async function createPrediction(imageUrl: string, language?: string, isLoggedIn?: boolean): Promise<PredictionResponse> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  if (language) {
+    headers['x-language'] = language
+  }
+  if (typeof isLoggedIn === 'boolean') {
+    headers['x-user-logged-in'] = isLoggedIn.toString()
+  }
+
   const response = await fetch('/api/restore', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: JSON.stringify({ imageUrl })
   })
 
@@ -29,8 +37,18 @@ export async function createPrediction(imageUrl: string): Promise<PredictionResp
 }
 
 // 获取预测状态
-export async function getPrediction(id: string): Promise<PredictionResponse> {
-  const response = await fetch(`/api/restore/${id}`)
+export async function getPrediction(id: string, language?: string, isLoggedIn?: boolean): Promise<PredictionResponse> {
+  const headers: Record<string, string> = {}
+  if (language) {
+    headers['x-language'] = language
+  }
+  if (typeof isLoggedIn === 'boolean') {
+    headers['x-user-logged-in'] = isLoggedIn.toString()
+  }
+
+  const response = await fetch(`/api/restore/${id}`, {
+    headers: Object.keys(headers).length > 0 ? headers : undefined
+  })
 
   if (!response.ok) {
     const error = await response.json()
