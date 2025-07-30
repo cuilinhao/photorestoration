@@ -1,20 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Mail, Crown, Sparkles, Eye, EyeOff, User } from "lucide-react"
 import { toast } from "sonner"
 import { useUser } from "@/contexts/UserContext"
 import { useLanguage } from "@/contexts/LanguageContext"
+import { supabase } from "@/lib/supabase"
+import styles from "./AuthModal.module.css"
 
 interface AuthModalProps {
   isOpen: boolean
@@ -26,11 +23,35 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [fullName, setFullName] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [showEmailVerification, setShowEmailVerification] = useState(false)
+  const [isResendingEmail, setIsResendingEmail] = useState(false)
   const { signIn, signUp } = useUser()
   const { t, language } = useLanguage()
+
+  // 翻译错误信息
+  const translateError = (error: Error): string => {
+    if (error.name === 'AuthError') {
+      switch (error.message) {
+        case 'AUTH_INVALID_CREDENTIALS':
+          return t('auth.invalidCredentials')
+        case 'AUTH_TOO_MANY_REQUESTS':
+          return t('auth.tooManyRequests')
+        case 'AUTH_OPERATION_TOO_FREQUENT':
+          return t('auth.operationTooFrequent')
+        case 'AUTH_ACCOUNT_VERIFICATION_FAILED':
+          return t('auth.accountVerificationFailed')
+        case 'AUTH_SIGNIN_FAILED_CHECK_CREDENTIALS':
+          return t('auth.signinFailedCheckCredentials')
+        default:
+          return error.message
+      }
+    }
+    return error.message
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,9 +66,26 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
       return
     }
 
-    if (mode === 'signup' && !fullName.trim()) {
-      toast.error(t('auth.nameRequired'))
-      return
+    if (mode === 'signup') {
+      if (!firstName.trim()) {
+        toast.error(t('auth.firstNameRequired'))
+        return
+      }
+      
+      if (!lastName.trim()) {
+        toast.error(t('auth.lastNameRequired'))
+        return
+      }
+      
+      if (password !== confirmPassword) {
+        toast.error(t('auth.confirmPasswordMismatch'))
+        return
+      }
+      
+      if (password.length < 6) {
+        toast.error(t('auth.passwordTooShort'))
+        return
+      }
     }
 
     setIsLoading(true)
@@ -55,30 +93,41 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
       let success = false
       
       if (mode === 'signup') {
-        console.log('开始注册用户:', { email: email.trim(), fullName: fullName.trim() })
+        const fullName = `${firstName.trim()} ${lastName.trim()}`
+        console.log('开始注册用户:', { email: email.trim(), fullName })
         try {
-          success = await signUp(email.trim(), password, fullName.trim())
+          success = await signUp(email.trim(), password, fullName)
           if (success) {
             console.log('用户注册成功:', email.trim())
             toast.success(t('auth.signupSuccess'), {
               position: 'top-center',
               duration: 3000
             })
-            resetForm()
-            onClose()
+            // 显示邮箱验证提示
+            setShowEmailVerification(true)
+            return
           }
         } catch (error: unknown) {
           console.log('用户注册失败:', { email: email.trim(), error: error instanceof Error ? error.message : String(error) })
-          toast.error((error instanceof Error ? error.message : String(error)) || t('auth.signupFailed'), {
+          
+          // 检查是否需要邮箱验证
+          if (error instanceof Error && error.message?.includes('Email not confirmed')) {
+            setShowEmailVerification(true)
+            return
+          }
+          
+          toast.error((error instanceof Error ? translateError(error) : String(error)) || t('auth.signupFailed'), {
             position: 'top-center',
             duration: 4000
           })
-          return // Exit early on error
+          return
         }
       } else {
         console.log('开始用户登录:', email.trim())
         try {
+          console.log('AuthModal: 开始调用 signIn')
           success = await signIn(email.trim(), password)
+          console.log('AuthModal: signIn 返回结果:', success)
           if (success) {
             console.log('用户登录成功:', email.trim())
             toast.success(t('auth.signinSuccess'), {
@@ -87,14 +136,27 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
             })
             resetForm()
             onClose()
+          } else {
+            console.log('AuthModal: signIn 返回 false')
+            toast.error('登录失败，请重试')
           }
         } catch (error: unknown) {
           console.log('用户登录失败:', { email: email.trim(), error: error instanceof Error ? error.message : String(error) })
-          toast.error((error instanceof Error ? error.message : String(error)) || t('auth.signinFailed'), {
+          
+          // 检查是否是邮箱验证问题
+          if (error instanceof Error && (
+            error.message?.includes('Email not confirmed') || 
+            error.message?.includes('邮箱未验证')
+          )) {
+            setShowEmailVerification(true)
+            return
+          }
+          
+          toast.error((error instanceof Error ? translateError(error) : String(error)) || t('auth.signinFailed'), {
             position: 'top-center',
             duration: 4000
           })
-          return // Exit early on error
+          return
         }
       }
     } catch (error) {
@@ -115,8 +177,10 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
   const resetForm = () => {
     setEmail("")
     setPassword("")
-    setFullName("")
-    setShowPassword(false)
+    setConfirmPassword("")
+    setFirstName("")
+    setLastName("")
+    setShowEmailVerification(false)
   }
 
   const toggleMode = () => {
@@ -124,185 +188,221 @@ export default function AuthModal({ isOpen, onClose, initialMode = 'signin' }: A
     resetForm()
   }
 
+  const handleResendVerification = async () => {
+    if (!email.trim()) {
+      toast.error(t('auth.invalidEmail'))
+      return
+    }
+
+    setIsResendingEmail(true)
+    try {
+      // 重新发送验证邮件
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email.trim()
+      })
+
+      if (error) {
+        console.error('Resend verification error:', error)
+        toast.error(t('auth.emailVerificationFailed'))
+      } else {
+        toast.success(t('auth.verificationEmailSent'), {
+          position: 'top-center',
+          duration: 3000
+        })
+      }
+    } catch (error) {
+      console.error('Resend verification error:', error)
+      toast.error(t('auth.emailVerificationFailed'))
+    } finally {
+      setIsResendingEmail(false)
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-xs">PR</span>
-            </div>
-            {mode === 'signup' ? t('auth.signupTitle') : t('auth.signinTitle')}
-          </DialogTitle>
-          <DialogDescription>
-            {mode === 'signup' ? t('auth.signupSubtitle') : t('auth.signinSubtitle')}
-          </DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Form Fields */}
-          <div className="space-y-4">
-            {mode === 'signup' && (
-              <div className="space-y-2">
-                <Label htmlFor="fullName">{t('auth.fullNameLabel')}</Label>
-                <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder={t('auth.fullNamePlaceholder')}
-                    value={fullName}
-                    onChange={(e) => setFullName(e.target.value)}
-                    className="pl-10"
-                    disabled={isLoading}
-                    required={mode === 'signup'}
-                  />
-                </div>
+      <DialogContent className="sm:max-w-md p-0 border-0 bg-transparent">
+        <DialogTitle className="sr-only">
+          {mode === 'signup' ? 'Sign Up' : 'Sign In'}
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          {mode === 'signup' ? 'Create a new account' : 'Sign in to your account'}
+        </DialogDescription>
+        <div className="auth-modal-container">
+          {showEmailVerification ? (
+            <div className={styles.form}>
+              <p className={styles.title}>
+                {t('auth.emailNotConfirmed')}
+              </p>
+              <p className={styles.message}>
+                {t('auth.checkEmailInbox')}
+              </p>
+              
+              <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '14px', marginBottom: '15px' }}>
+                  {t('auth.emailVerificationSent')}: <strong>{email}</strong>
+                </p>
+                
+                <button 
+                  type="button"
+                  className={styles.submit}
+                  onClick={handleResendVerification}
+                  disabled={isResendingEmail}
+                  style={{ marginBottom: '10px' }}
+                >
+                  {isResendingEmail ? (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                      <div style={{ 
+                        width: '16px', 
+                        height: '16px', 
+                        border: '2px solid rgba(255,255,255,0.3)', 
+                        borderTop: '2px solid white', 
+                        borderRadius: '50%', 
+                        animation: 'spin 1s linear infinite' 
+                      }} />
+                      {language === 'zh' ? '发送中...' : 'Sending...'}
+                    </div>
+                  ) : (
+                    t('auth.resendVerification')
+                  )}
+                </button>
+                
+                <p className={styles.signin}>
+                  <a 
+                    href="#" 
+                    onClick={(e) => {
+                      e.preventDefault()
+                      setShowEmailVerification(false)
+                      resetForm()
+                    }}
+                  >
+                    {language === 'zh' ? '返回登录' : 'Back to Sign In'}
+                  </a>
+                </p>
               </div>
-            )}
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className={styles.form}>
+              <p className={styles.title}>
+                {mode === 'signup' ? t('auth.signupTitle') : t('auth.signinTitle')}
+              </p>
+              <p className={styles.message}>
+                {mode === 'signup' 
+                  ? t('auth.signupSubtitle')
+                  : t('auth.signinSubtitle')
+                }
+              </p>
+              
+              {mode === 'signup' && (
+                <div className={styles.flex}>
+                  <label>
+                    <input 
+                      className={styles.input} 
+                      type="text" 
+                      placeholder="" 
+                      required
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      disabled={isLoading}
+                    />
+                    <span>{language === 'zh' ? '名字' : 'Firstname'}</span>
+                  </label>
 
-            <div className="space-y-2">
-              <Label htmlFor="email">{t('auth.emailLabel')}</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder={t('auth.emailPlaceholder')}
+                  <label>
+                    <input 
+                      className={styles.input} 
+                      type="text" 
+                      placeholder="" 
+                      required
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      disabled={isLoading}
+                    />
+                    <span>{language === 'zh' ? '姓氏' : 'Lastname'}</span>
+                  </label>
+                </div>
+              )}
+                          
+              <label>
+                <input 
+                  className={styles.input} 
+                  type="email" 
+                  placeholder="" 
+                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
                   disabled={isLoading}
-                  required
                 />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">{t('auth.passwordLabel')}</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder={t('auth.passwordPlaceholder')}
+                <span>{language === 'zh' ? '邮箱' : 'Email'}</span>
+              </label> 
+                  
+              <label>
+                <input 
+                  className={styles.input} 
+                  type="password" 
+                  placeholder="" 
+                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pr-10"
                   disabled={isLoading}
-                  required
                   minLength={6}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 h-4 w-4 text-muted-foreground hover:text-foreground"
-                  disabled={isLoading}
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
+                <span>{language === 'zh' ? '密码' : 'Password'}</span>
+              </label>
+              
               {mode === 'signup' && (
-                <p className="text-xs text-muted-foreground">
-                  {t('auth.passwordHint')}
-                </p>
+                <label>
+                  <input 
+                    className={styles.input} 
+                    type="password" 
+                    placeholder="" 
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    disabled={isLoading}
+                    minLength={6}
+                  />
+                  <span>{language === 'zh' ? '确认密码' : 'Confirm password'}</span>
+                </label>
               )}
-            </div>
-
-            <Button 
-              type="submit"
-              className="w-full" 
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  {mode === 'signup' ? t('auth.signupLoading') : t('auth.signinLoading')}
-                </div>
-              ) : (
-                mode === 'signup' ? t('auth.signupButton') : t('auth.signinButton')
-              )}
-            </Button>
-          </div>
-
-          {/* Mode Toggle */}
-          <div className="text-center">
-            <p className="text-sm text-muted-foreground">
-              {mode === 'signup' ? t('auth.alreadyHaveAccount') : t('auth.noAccount')}
-              {' '}
-              <button
-                type="button"
-                onClick={toggleMode}
-                className="text-primary hover:underline font-medium"
+              
+              <button 
+                type="submit" 
+                className={styles.submit}
                 disabled={isLoading}
               >
-                {mode === 'signup' ? t('auth.signinLink') : t('auth.signupLink')}
+                {isLoading ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                    <div style={{ 
+                      width: '16px', 
+                      height: '16px', 
+                      border: '2px solid rgba(255,255,255,0.3)', 
+                      borderTop: '2px solid white', 
+                      borderRadius: '50%', 
+                      animation: 'spin 1s linear infinite' 
+                    }} />
+                    {mode === 'signup' ? t('auth.signupLoading') : t('auth.signinLoading')}
+                  </div>
+                ) : (
+                  mode === 'signup' ? t('auth.signupButton') : t('auth.signinButton')
+                )}
               </button>
-            </p>
-          </div>
-
-          {/* Features */}
-          <div className="space-y-4">
-            {/* Free Features */}
-            <div className="p-4 rounded-lg border bg-muted/50">
-              <h4 className="font-semibold mb-3 flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-primary" />
-                {t('auth.freeFeatures')}
-              </h4>
-              <ul className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                  {t('auth.feature1')}
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                  {t('auth.feature2')}
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                  {t('auth.feature3')}
-                </li>
-              </ul>
-            </div>
-
-            {/* Premium Features */}
-            <div className="p-4 rounded-lg border bg-gradient-to-br from-primary/5 to-accent/5">
-              <h4 className="font-semibold mb-3 flex items-center gap-2">
-                <Crown className="h-4 w-4 text-yellow-500" />
-                {t('auth.premiumFeatures')}
-              </h4>
-              <ul className="space-y-2 text-sm text-muted-foreground mb-4">
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full" />
-                  {t('auth.premiumFeature1')}
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full" />
-                  {t('auth.premiumFeature2')}
-                </li>
-                <li className="flex items-center gap-2">
-                  <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full" />
-                  {t('auth.premiumFeature3')}
-                </li>
-              </ul>
-              <Button 
-                type="button"
-                variant="outline" 
-                size="sm" 
-                className="w-full"
-                onClick={() => {
-                  toast.success(t('common.upgradeComingSoon'), {
-                    position: 'top-center',
-                    duration: 3000
-                  })
-                }}
-                disabled={isLoading}
-              >
-                <Crown className="h-4 w-4 mr-2" />
-                {t('auth.upgradeButton')}
-              </Button>
-            </div>
-          </div>
-        </form>
+              
+              <p className={styles.signin}>
+                {mode === 'signup' ? t('auth.alreadyHaveAccount') : t('auth.noAccount')}{' '}
+                <a 
+                  href="#" 
+                  onClick={(e) => {
+                    e.preventDefault()
+                    toggleMode()
+                  }}
+                >
+                  {mode === 'signup' ? t('auth.signinLink') : t('auth.signupLink')}
+                </a>
+              </p>
+            </form>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   )

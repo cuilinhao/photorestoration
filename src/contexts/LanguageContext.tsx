@@ -46,7 +46,8 @@ const translations = {
     'upload.aiRestore': 'AI 修复',
     'upload.subtitle': '支持 JPG、PNG 格式，最大 8MB',
     'upload.pleaseLogin': '请先登录后使用服务',
-    'upload.usageExhausted': '您的免费使用次数已用完，请升级到付费版',
+    'upload.loginRequired': '请先注册登录才能使用 AI 修复服务',
+    'upload.usageExhausted': '您今日的免费使用次数已用完，请明天再试或升级到付费版',
     'upload.invalidFormat': '请上传 JPG 或 PNG 格式的图片',
     'upload.fileTooLarge': '图片大小不能超过 8MB',
     'upload.uploading': '上传中...',
@@ -56,12 +57,10 @@ const translations = {
     'upload.processingInit': '正在初始化 FLUX 模型...',
     'upload.dropHere': '松开鼠标上传照片',
     'upload.ready': '准备开始 AI 修复之旅',
-    'upload.loginRequired': '请先登录使用 AI 修复服务',
-    'upload.freeTrials': '未登录可免费使用',
-    'upload.guestTrials': '次，登录后可使用',
+    'upload.dailyLimit': '每日可免费使用',
     'upload.times': '次',
     'upload.login': '立即登录',
-    'upload.usageLimit': '免费使用次数已用完',
+    'upload.usageLimit': '今日免费使用次数已用完',
     'upload.upgrade': '升级到付费版享受',
     'upload.unlimited': '无限次数',
     'upload.upgradeBtn': '升级到付费版',
@@ -69,6 +68,7 @@ const translations = {
     'upload.supportFormat': '支持',
     'upload.maxSize': '格式，最大',
     'upload.remainingUses': '剩余使用次数:',
+    'upload.dailyFreeInfo': '登录用户每天可免费使用 5 次',
     'upload.fastProcess': '60秒快速处理',
     'upload.aiColor': 'AI 智能上色',
     'upload.hdOutput': '2K 高清输出',
@@ -214,7 +214,27 @@ const translations = {
     'auth.premiumFeature1': '无限次数修复',
     'auth.premiumFeature2': '优先处理队列',
     'auth.premiumFeature3': '批量处理功能',
-    'auth.upgradeButton': '升级到付费版'
+    'auth.upgradeButton': '升级到付费版',
+
+    // Email verification
+    'auth.emailNotConfirmed': '邮箱未验证',
+    'auth.emailVerificationRequired': '请先验证您的邮箱地址',
+    'auth.checkEmailInbox': '我们已向您的邮箱发送了验证链接，请查收邮件并点击链接完成验证',
+    'auth.emailVerificationSent': '验证邮件已发送',
+    'auth.resendVerification': '重新发送验证邮件',
+    'auth.verificationEmailSent': '验证邮件已重新发送，请查收',
+    'auth.emailVerificationFailed': '发送验证邮件失败，请稍后重试',
+    'auth.confirmPasswordMismatch': '两次输入的密码不一致',
+    'auth.passwordTooShort': '密码至少需要6位字符',
+    'auth.firstNameRequired': '请输入名字',
+    'auth.lastNameRequired': '请输入姓氏',
+
+    // Error messages
+    'auth.invalidCredentials': '邮箱或密码错误',
+    'auth.tooManyRequests': '请求过于频繁，请稍后再试',
+    'auth.operationTooFrequent': '操作频繁，请稍后再试',
+    'auth.accountVerificationFailed': '账户验证失败，请重试',
+    'auth.signinFailedCheckCredentials': '登录失败，请检查邮箱和密码'
   },
   en: {
     // Header 相关
@@ -248,7 +268,8 @@ const translations = {
     'upload.aiRestore': 'AI Restoration',
     'upload.subtitle': 'Supports JPG, PNG formats, max 8MB',
     'upload.pleaseLogin': 'Please login first to use the service',
-    'upload.usageExhausted': 'Your free usage limit has been reached, please upgrade to premium',
+    'upload.loginRequired': 'Please register and login to use AI restoration service',
+    'upload.usageExhausted': 'Your daily free usage limit has been reached, please try again tomorrow or upgrade to premium',
     'upload.invalidFormat': 'Please upload JPG or PNG format images',
     'upload.fileTooLarge': 'Image size cannot exceed 8MB',
     'upload.uploading': 'Uploading...',
@@ -258,13 +279,10 @@ const translations = {
     'upload.processingInit': 'Initializing FLUX model...',
     'upload.dropHere': 'Release to upload photo',
     'upload.ready': 'Ready to start AI restoration journey',
-    'upload.loginRequired': 'Please login first to use AI restoration service',
-    'upload.freeTrials': 'Get',
-    'upload.guestTrials': 'free tries as guest, or',
-    'upload.loggedInTrials': 'tries after login',
-    'upload.times': 'free restorations after login',
+    'upload.dailyLimit': 'Daily free usage',
+    'upload.times': ' times',
     'upload.login': 'Login Now',
-    'upload.usageLimit': 'Free usage limit reached',
+    'upload.usageLimit': 'Daily free usage limit reached',
     'upload.upgrade': 'Upgrade to premium for',
     'upload.unlimited': 'unlimited',
     'upload.upgradeBtn': 'Upgrade to Premium',
@@ -272,6 +290,7 @@ const translations = {
     'upload.supportFormat': 'Supports',
     'upload.maxSize': 'formats, max',
     'upload.remainingUses': 'Remaining uses:',
+    'upload.dailyFreeInfo': 'Logged-in users get 5 free uses daily',
     'upload.fastProcess': '⚡ 60s Fast Processing',
     'upload.aiColor': '🎨 AI Smart Coloring',
     'upload.hdOutput': '📱 2K HD Output',
@@ -417,7 +436,27 @@ const translations = {
     'auth.premiumFeature1': 'Unlimited restorations',
     'auth.premiumFeature2': 'Priority processing',
     'auth.premiumFeature3': 'Batch processing',
-    'auth.upgradeButton': 'Upgrade to Premium'
+    'auth.upgradeButton': 'Upgrade to Premium',
+
+    // Email verification
+    'auth.emailNotConfirmed': 'Email Not Verified',
+    'auth.emailVerificationRequired': 'Please verify your email address first',
+    'auth.checkEmailInbox': 'We have sent a verification link to your email. Please check your inbox and click the link to complete verification',
+    'auth.emailVerificationSent': 'Verification email sent',
+    'auth.resendVerification': 'Resend verification email',
+    'auth.verificationEmailSent': 'Verification email has been resent, please check your inbox',
+    'auth.emailVerificationFailed': 'Failed to send verification email, please try again later',
+    'auth.confirmPasswordMismatch': 'Passwords do not match',
+    'auth.passwordTooShort': 'Password must be at least 6 characters',
+    'auth.firstNameRequired': 'Please enter your first name',
+    'auth.lastNameRequired': 'Please enter your last name',
+
+    // Error messages
+    'auth.invalidCredentials': 'Invalid email or password',
+    'auth.tooManyRequests': 'Too many requests, please try again later',
+    'auth.operationTooFrequent': 'Operation too frequent, please try again later',
+    'auth.accountVerificationFailed': 'Account verification failed, please try again',
+    'auth.signinFailedCheckCredentials': 'Sign in failed, please check your email and password'
   }
 }
 

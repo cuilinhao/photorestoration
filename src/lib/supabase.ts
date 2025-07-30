@@ -179,13 +179,22 @@ export async function signUpWithEmail(email: string, password: string, fullName?
       }
     }
   })
-  
+
   // Note: Email verification is handled at the Supabase project level
   // Make sure to disable "Enable email confirmations" in your Supabase project settings
 
   if (error) {
+    console.error('Supabase signup error:', error)
     throw error
   }
+
+  // 如果用户创建成功但需要邮箱验证，我们仍然返回成功
+  // 因为在项目设置中应该禁用邮箱验证
+  console.log('Signup successful:', {
+    user: data.user?.email,
+    confirmed: data.user?.email_confirmed_at,
+    session: !!data.session
+  })
 
   return data
 }
@@ -197,8 +206,22 @@ export async function signInWithEmail(email: string, password: string) {
   })
 
   if (error) {
+    console.error('Supabase signin error:', error)
+
+    // 如果是邮箱未确认的错误，提供更详细的信息
+    if (error.message?.includes('Email not confirmed')) {
+      console.error('Email not confirmed error - check Supabase auth settings')
+      throw new Error('邮箱未验证。请检查 Supabase 项目设置中是否禁用了邮箱验证，或联系管理员手动确认账户。')
+    }
+
     throw error
   }
+
+  console.log('Signin successful:', {
+    user: data.user?.email,
+    confirmed: data.user?.email_confirmed_at,
+    session: !!data.session
+  })
 
   return data
 }

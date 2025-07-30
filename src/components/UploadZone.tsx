@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react"
 import { useDropzone } from "react-dropzone"
-import { Upload, ImageIcon, Lock, Crown } from "lucide-react"
+import { Upload, ImageIcon, Lock, Crown, User } from "lucide-react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import Loader from "./Loader"
@@ -24,7 +24,17 @@ export default function UploadZone() {
     const file = acceptedFiles[0]
     if (!file) return
 
-    // 检查使用次数限制（登录和未登录用户都需要检查）
+    // 检查是否已登录
+    if (!user) {
+      toast.error(t('upload.loginRequired'), {
+        position: 'top-center',
+        duration: 4000
+      })
+      setShowLoginModal(true)
+      return
+    }
+
+    // 检查使用次数限制
     if (!canUseService()) {
       toast.error(t('upload.usageExhausted'), {
         position: 'top-center',
@@ -35,15 +45,6 @@ export default function UploadZone() {
 
     // 增加使用次数
     incrementUsage()
-
-    // 显示相应的提示信息
-    if (!user) {
-      console.log('🚀 [UPLOAD] Guest user detected, allowing upload with limitations')
-      toast.info(t('upload.guestModeToast'), {
-        position: 'top-center',
-        duration: 3000
-      })
-    }
 
     // 调试信息
     console.log('📋 [FILE-CHECK] File details:', {
@@ -105,7 +106,7 @@ export default function UploadZone() {
       'image/*': [], // 接受所有图片类型
     },
     multiple: false,
-    disabled: status !== 'idle' || !canUseService(),
+    disabled: status !== 'idle' || !user || !canUseService(),
     // 完全不限制文件类型，让我们的自定义验证处理
     validator: undefined
   })
@@ -232,6 +233,30 @@ export default function UploadZone() {
                       </p>
                     </div>
                   </>
+                ) : !user ? (
+                  // 未登录状态
+                  <>
+                    <div className="w-20 h-20 mx-auto bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
+                      <User className="w-10 h-10 text-blue-600" />
+                    </div>
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <p className="text-xl font-semibold text-foreground">
+                          {t('upload.loginRequired')}
+                        </p>
+                        <p className="text-muted-foreground">
+                          {t('upload.dailyLimit')} <strong>5{t('upload.times')}</strong>
+                        </p>
+                      </div>
+                      <Button
+                        className="mx-auto"
+                        onClick={() => setShowLoginModal(true)}
+                      >
+                        <User className="w-4 h-4 mr-2" />
+                        {t('upload.login')}
+                      </Button>
+                    </div>
+                  </>
                 ) : !canUseService() ? (
                   // 使用次数耗尽状态
                   <>
@@ -247,7 +272,7 @@ export default function UploadZone() {
                           {t('upload.upgrade')} <strong>{t('upload.unlimited')}</strong> 修复和优先处理
                         </p>
                       </div>
-                      <Button 
+                      <Button
                         className="mx-auto"
                         onClick={() => {
                           toast.success(t('common.upgradeComingSoon'), {
@@ -277,6 +302,9 @@ export default function UploadZone() {
                         </p>
                         <p className="text-sm text-primary font-medium">
                           {t('upload.remainingUses')} {getRemainingUses() === -1 ? t('header.unlimited') : `${getRemainingUses()}${t('upload.times')}`}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {t('upload.dailyFreeInfo')}
                         </p>
                         {!user && (
                           <div className="space-y-2">

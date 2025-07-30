@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server'
 
-const GUEST_USAGE_LIMIT = 3  // 未登录用户每日限制
 const LOGGED_IN_USAGE_LIMIT = 5  // 登录用户每日限制
 
 interface UsageData {
@@ -35,11 +34,16 @@ function getClientIP(request: NextRequest): string {
  * 检查IP是否可以使用服务（基于每日限制）
  */
 export function canUseServiceByIP(request: NextRequest): boolean {
-  const ip = getClientIP(request)
-
   // 从请求头获取用户登录状态
   const isLoggedIn = request.headers.get('x-user-logged-in') === 'true'
-  const usageLimit = isLoggedIn ? LOGGED_IN_USAGE_LIMIT : GUEST_USAGE_LIMIT
+
+  // 必须登录才能使用
+  if (!isLoggedIn) {
+    return false
+  }
+
+  const ip = getClientIP(request)
+  const usageLimit = LOGGED_IN_USAGE_LIMIT
 
   try {
     // 在服务器端，我们需要使用其他方式存储，这里先用内存存储
@@ -60,8 +64,8 @@ export function canUseServiceByIP(request: NextRequest): boolean {
     return usage.count < usageLimit
   } catch (error) {
     console.error('Error checking IP usage:', error)
-    // 如果检查失败，允许使用（避免误杀）
-    return true
+    // 如果检查失败，不允许使用（更安全）
+    return false
   }
 }
 
@@ -96,11 +100,16 @@ export function incrementIPUsage(request: NextRequest): void {
  * 获取IP剩余使用次数
  */
 export function getRemainingUsesByIP(request: NextRequest): number {
-  const ip = getClientIP(request)
-
   // 从请求头获取用户登录状态
   const isLoggedIn = request.headers.get('x-user-logged-in') === 'true'
-  const usageLimit = isLoggedIn ? LOGGED_IN_USAGE_LIMIT : GUEST_USAGE_LIMIT
+
+  // 必须登录才能使用
+  if (!isLoggedIn) {
+    return 0
+  }
+
+  const ip = getClientIP(request)
+  const usageLimit = LOGGED_IN_USAGE_LIMIT
 
   try {
     const usage = getIPUsageFromMemory(ip)
@@ -119,7 +128,7 @@ export function getRemainingUsesByIP(request: NextRequest): number {
     return Math.max(0, usageLimit - usage.count)
   } catch (error) {
     console.error('Error getting remaining uses by IP:', error)
-    return usageLimit
+    return 0
   }
 }
 

@@ -44,7 +44,6 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
 
-const GUEST_USAGE_LIMIT = 3  // 未登录用户每日限制
 const LOGGED_IN_USAGE_LIMIT = 5  // 登录用户每日限制
 
 // Helper function to convert profile to user format
@@ -68,11 +67,14 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const loadUserProfile = useCallback(async (userId: string) => {
     try {
       console.log('Loading user profile for:', userId)
-      
+
+      console.log('Calling getProfile...')
       let userProfile = await getProfile(userId)
-      
+      console.log('getProfile result:', userProfile)
+
       // If profile doesn't exist, create it using current supabase user
       if (!userProfile) {
+        console.log('Profile not found, creating new profile...')
         const { data: { user: currentUser } } = await supabase.auth.getUser()
         if (currentUser) {
           console.log('Creating new profile for user:', currentUser.email)
@@ -80,6 +82,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
             email: currentUser.email!,
             full_name: currentUser.user_metadata?.full_name
           })
+          console.log('createProfile result:', userProfile)
         }
       }
 
@@ -211,6 +214,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
       
       if (authUser) {
         console.log('登录成功，用户ID:', authUser.id)
+        // 登录成功后，loadUserData 会通过 auth state change 自动触发
+        // 这里我们只需要返回 true，用户状态会自动更新
         return true
       }
       
@@ -219,21 +224,31 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } catch (error: unknown) {
       console.error('登录错误详情:', error)
       
-      // Handle specific Supabase errors
+      // Handle specific Supabase errors with error codes for translation
       if (error instanceof Error && error.message?.includes('For security purposes')) {
-        throw new Error('操作频繁，请稍后再试')
+        const err = new Error('AUTH_OPERATION_TOO_FREQUENT')
+        err.name = 'AuthError'
+        throw err
       } else if (error instanceof Error && error.message?.includes('Invalid login credentials')) {
-        throw new Error('邮箱或密码错误')
+        const err = new Error('AUTH_INVALID_CREDENTIALS')
+        err.name = 'AuthError'
+        throw err
       } else if (error instanceof Error && error.message?.includes('Email not confirmed')) {
         // Email verification is disabled, this should not happen
         console.warn('Email not confirmed error received but verification is disabled')
-        throw new Error('账户验证失败，请重试')
+        const err = new Error('AUTH_ACCOUNT_VERIFICATION_FAILED')
+        err.name = 'AuthError'
+        throw err
       } else if (error instanceof Error && error.message?.includes('Too many requests')) {
-        throw new Error('请求过于频繁，请稍后再试')
+        const err = new Error('AUTH_TOO_MANY_REQUESTS')
+        err.name = 'AuthError'
+        throw err
       }
-      
+
       // Default error message
-      throw new Error('登录失败，请检查邮箱和密码')
+      const err = new Error('AUTH_SIGNIN_FAILED_CHECK_CREDENTIALS')
+      err.name = 'AuthError'
+      throw err
     }
   }
 
@@ -276,26 +291,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // Check if user can use service
   const canUseService = (): boolean => {
+    // 必须登录才能使用
     if (!user) {
-      // 未登录用户的限制检查
-      // 检查是否在浏览器环境中
-      if (typeof window === 'undefined') {
-        return true // 在服务器端渲染时，默认允许
-      }
-
-      const guestUsage = localStorage.getItem('guest_usage')
-      if (guestUsage) {
-        const usage = JSON.parse(guestUsage)
-        const today = new Date().toISOString().split('T')[0]
-
-        // 如果是新的一天，重置次数
-        if (usage.lastUsageDate.split('T')[0] !== today) {
-          return true
-        }
-
-        return usage.count < GUEST_USAGE_LIMIT
-      }
-      return true
+      return false
     }
 
     if (user.isPremium) return true
@@ -314,38 +312,16 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
   // Increment usage count
   const incrementUsage = async (): Promise<void> => {
-    if (!user) {
-      // 未登录用户，在localStorage中记录使用次数
-      // 检查是否在浏览器环境中
-      if (typeof window === 'undefined') {
-        return // 在服务器端渲染时，不执行
-      }
-
-      const guestUsage = localStorage.getItem('guest_usage')
-      let usage = { count: 0, lastUsageDate: new Date().toISOString() }
-
-      if (guestUsage) {
-        usage = JSON.parse(guestUsage)
-      }
-
-      // 检查是否是新的一天
-      const today = new Date().toISOString().split('T')[0]
-      if (usage.lastUsageDate.split('T')[0] !== today) {
-        usage.count = 1
-      } else {
-        usage.count += 1
-      }
-
-      usage.lastUsageDate = new Date().toISOString()
-      localStorage.setItem('guest_usage', JSON.stringify(usage))
+    // 只有登录用户才能使用
+    if (!user || !supabaseUser) {
       return
     }
 
-    if (!supabaseUser || user.isPremium) return
+    if (user.isPremium) return
 
     const today = new Date()
     const lastUsage = new Date(user.lastUsageDate)
-    
+
     let newUsageCount = user.usageCount
 
     // If different day, reset usage
@@ -376,25 +352,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   // Get remaining uses
   const getRemainingUses = (): number => {
     if (!user) {
-      // 未登录用户剩余次数
-      // 检查是否在浏览器环境中
-      if (typeof window === 'undefined') {
-        return GUEST_USAGE_LIMIT // 在服务器端渲染时，返回默认值
-      }
-
-      const guestUsage = localStorage.getItem('guest_usage')
-      if (guestUsage) {
-        const usage = JSON.parse(guestUsage)
-        const today = new Date().toISOString().split('T')[0]
-
-        // 如果是新的一天，返回全部次数
-        if (usage.lastUsageDate.split('T')[0] !== today) {
-          return GUEST_USAGE_LIMIT
-        }
-
-        return Math.max(0, GUEST_USAGE_LIMIT - usage.count)
-      }
-      return GUEST_USAGE_LIMIT
+      return 0 // 未登录用户没有使用次数
     }
 
     if (user.isPremium) return -1 // -1 means unlimited
